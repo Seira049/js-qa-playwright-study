@@ -139,6 +139,91 @@ const CURRICULUM = {
       ],
     },
     {
+      name: "TypeScript for QA",
+      modules: [
+        {
+          id: "ts-for-qa",
+          title: "TypeScript Essentials",
+          level: "Beginner → Intermediate",
+          duration: "1-2 weeks",
+          summary: "Modern Playwright is TypeScript-first. Learn just enough TypeScript to write typed, self-documenting tests and catch mistakes before they run.",
+          lessons: [
+            {
+              title: "Why TypeScript for test automation",
+              body: [
+                { type: "p", text: "TypeScript is JavaScript with types. The types are checked before the test runs, so whole classes of bugs (wrong field names, missing properties, bad arguments) are caught in your editor instead of at runtime." },
+                { type: "list", items: [
+                  "Autocomplete for Playwright's API — fewer docs lookups",
+                  "Typos in property names become compile errors",
+                  "Refactoring is safe: rename a field and TS finds every use",
+                  "Playwright's own types describe page, locator, expect for you",
+                ]},
+                { type: "p", text: "Playwright projects created with npm init use .ts files by default — you already have TypeScript set up." },
+              ],
+            },
+            {
+              title: "Basic type annotations",
+              body: [
+                { type: "p", text: "Annotate values with : type. Often you can let TypeScript infer the type and only annotate function parameters and public APIs." },
+                { type: "code", text: "const baseUrl: string = 'https://example.com';\nlet attempts: number = 0;\nconst isLoggedIn: boolean = false;\n\nfunction buildUrl(path: string): string {\n  return baseUrl + path;\n}" },
+                { type: "h", text: "Arrays and unions" },
+                { type: "code", text: "const roles: string[] = ['admin', 'qa'];\nlet status: 'active' | 'locked' | 'pending' = 'active'; // union type" },
+              ],
+            },
+            {
+              title: "Interfaces and types for test data",
+              body: [
+                { type: "p", text: "Describe the shape of API payloads and fixtures so the compiler verifies you use them correctly." },
+                { type: "code", text: "interface User {\n  id: number;\n  name: string;\n  email: string;\n  role: 'admin' | 'qa' | 'viewer';\n  verified?: boolean; // optional\n}\n\nconst user: User = { id: 1, name: 'Ana', email: 'ana@test.io', role: 'qa' };\n// user.rol = 'qa';  // compile error: typo caught before running" },
+              ],
+            },
+            {
+              title: "Typing a Playwright test",
+              body: [
+                { type: "p", text: "Playwright ships its own types. You rarely annotate fixtures by hand, but typed helpers and page objects pay off fast." },
+                { type: "code", text: "import { test, expect, Page } from '@playwright/test';\n\nasync function login(page: Page, email: string, password: string): Promise<void> {\n  await page.getByLabel('Email').fill(email);\n  await page.getByLabel('Password').fill(password);\n  await page.getByRole('button', { name: 'Sign in' }).click();\n}\n\ntest('typed login helper', async ({ page }) => {\n  await page.goto('/login');\n  await login(page, 'qa@test.io', 'secret');\n  await expect(page).toHaveURL(/dashboard/);\n});" },
+              ],
+            },
+          ],
+          quiz: [
+            {
+              question: "What is the main advantage of TypeScript in test code?",
+              options: [
+                "Tests run faster at runtime",
+                "Type errors are caught before the test runs",
+                "It removes the need for assertions",
+                "It replaces Playwright",
+              ],
+              correct: 1,
+              explanation: "TypeScript checks types at compile time, catching wrong field names and bad arguments in your editor before running.",
+            },
+            {
+              question: "How do you declare a value that can only be one of a fixed set of strings?",
+              options: [
+                "string[]",
+                "a union type like 'active' | 'locked'",
+                "any",
+                "object",
+              ],
+              correct: 1,
+              explanation: "A union of string literals restricts the value to exactly those options, and TS flags anything else.",
+            },
+            {
+              question: "What does the ? in `verified?: boolean` mean?",
+              options: [
+                "The field is required",
+                "The field is optional",
+                "The field is a boolean question",
+                "The field is read-only",
+              ],
+              correct: 1,
+              explanation: "A ? marks a property as optional — it may be present or absent on the object.",
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: "Getting Started with Playwright",
       modules: [
         {
@@ -371,23 +456,62 @@ const CURRICULUM = {
       name: "API Testing",
       modules: [
         {
-          id: "pw-api",
+          id: "api-testing",
           title: "API Testing with Playwright",
           level: "Intermediate → Advanced",
-          duration: "1 week",
-          summary: "Playwright can test HTTP APIs directly — great for setup, teardown, and backend validation alongside UI tests.",
+          duration: "1-2 weeks",
+          summary: "Test HTTP APIs directly: status codes, request bodies, authentication, schema validation, and chaining calls. Great for backend checks and fast setup/teardown alongside UI tests.",
           lessons: [
+            {
+              title: "HTTP basics every QA should know",
+              body: [
+                { type: "p", text: "An API test sends an HTTP request and asserts on the response. You verify three things: the status code, the headers, and the body." },
+                { type: "h", text: "Common methods" },
+                { type: "list", items: [
+                  "GET — read a resource (no body)",
+                  "POST — create a resource (send a body)",
+                  "PUT / PATCH — update a resource",
+                  "DELETE — remove a resource",
+                ]},
+                { type: "h", text: "Status code families" },
+                { type: "list", items: [
+                  "2xx — success (200 OK, 201 Created, 204 No Content)",
+                  "4xx — client error (400 Bad Request, 401 Unauthorized, 404 Not Found)",
+                  "5xx — server error (500, 503) — usually a defect to report",
+                ]},
+              ],
+            },
             {
               title: "The request fixture",
               body: [
-                { type: "code", text: "test('create user via API', async ({ request }) => {\n  const res = await request.post('/api/users', {\n    data: { name: 'Ana', role: 'qa' },\n  });\n  expect(res.ok()).toBeTruthy();\n  const body = await res.json();\n  expect(body.name).toBe('Ana');\n});" },
+                { type: "p", text: "Playwright's request fixture makes HTTP calls without a browser page — fast and stable." },
+                { type: "code", text: "test('create user via API', async ({ request }) => {\n  const res = await request.post('/api/users', {\n    data: { name: 'Ana', role: 'qa' },\n  });\n  expect(res.status()).toBe(201);\n  const body = await res.json();\n  expect(body.name).toBe('Ana');\n});" },
                 { type: "p", text: "Use the API to seed data fast, then verify the result in the UI — faster and more stable than clicking through setup." },
               ],
             },
             {
-              title: "Validating responses",
+              title: "Authentication: headers and tokens",
               body: [
-                { type: "code", text: "const res = await request.get('/api/users/1');\nexpect(res.status()).toBe(200);\nconst user = await res.json();\nexpect(user).toMatchObject({ id: 1, role: 'qa' });" },
+                { type: "p", text: "Most APIs need an auth token. Send it as a header, or configure it once for the whole suite." },
+                { type: "code", text: "const res = await request.get('/api/profile', {\n  headers: { Authorization: `Bearer ${token}` },\n});\nexpect(res.status()).toBe(200);" },
+                { type: "p", text: "A 401 means the token is missing or invalid; a 403 means the token is valid but lacks permission — a key distinction when writing negative tests." },
+              ],
+            },
+            {
+              title: "Validating the response body",
+              body: [
+                { type: "p", text: "Check the fields you care about. toMatchObject verifies a subset without requiring every field." },
+                { type: "code", text: "const res = await request.get('/api/users/1');\nexpect(res.status()).toBe(200);\nconst user = await res.json();\n\nexpect(user).toMatchObject({ id: 1, role: 'qa' });\nexpect(user.email).toContain('@');\nexpect(Array.isArray(user.permissions)).toBeTruthy();" },
+                { type: "h", text: "Schema-style checks" },
+                { type: "p", text: "For stronger validation, assert types and required fields explicitly (or use a schema library like Zod)." },
+                { type: "code", text: "expect(typeof user.id).toBe('number');\nexpect(typeof user.name).toBe('string');" },
+              ],
+            },
+            {
+              title: "Chaining requests and negative tests",
+              body: [
+                { type: "p", text: "Real flows span several calls: create, read back, then clean up. And always test the unhappy paths." },
+                { type: "code", text: "// create -> fetch -> delete\nconst created = await (await request.post('/api/users', { data: { name: 'Temp' } })).json();\nconst fetched = await request.get(`/api/users/${created.id}`);\nexpect(fetched.status()).toBe(200);\nawait request.delete(`/api/users/${created.id}`);\n\n// negative: missing required field\nconst bad = await request.post('/api/users', { data: {} });\nexpect(bad.status()).toBe(400);" },
               ],
             },
           ],
@@ -399,15 +523,159 @@ const CURRICULUM = {
               explanation: "The request fixture makes HTTP calls directly, without a browser page.",
             },
             {
-              question: "A common use of API testing in a UI suite is to…",
+              question: "A 201 status code usually means…",
               options: [
-                "Replace all UI tests",
-                "Seed or clean up test data quickly",
-                "Render screenshots",
-                "Avoid assertions",
+                "The request was malformed",
+                "A resource was created successfully",
+                "The server crashed",
+                "Authentication failed",
               ],
               correct: 1,
-              explanation: "APIs seed and tear down state far faster and more reliably than driving the UI for setup.",
+              explanation: "201 Created is a 2xx success code returned after a POST creates a new resource.",
+            },
+            {
+              question: "What is the difference between 401 and 403?",
+              options: [
+                "They are identical",
+                "401 = not authenticated; 403 = authenticated but not permitted",
+                "401 = server error; 403 = client error",
+                "403 means the resource was created",
+              ],
+              correct: 1,
+              explanation: "401 Unauthorized means you are not logged in / token invalid; 403 Forbidden means you are, but lack permission.",
+            },
+            {
+              question: "Why use toMatchObject when validating a response?",
+              options: [
+                "It requires every field to match exactly",
+                "It checks a subset of fields you care about",
+                "It ignores the status code",
+                "It converts JSON to XML",
+              ],
+              correct: 1,
+              explanation: "toMatchObject asserts the fields you specify are present and correct, without failing on extra fields.",
+            },
+            {
+              question: "A good negative API test would check that…",
+              options: [
+                "A valid request returns 200",
+                "A request missing a required field returns 400",
+                "The homepage loads",
+                "The token is printed to the console",
+              ],
+              correct: 1,
+              explanation: "Negative tests verify the API rejects bad input correctly, e.g. 400 Bad Request for a missing required field.",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "SQL for QA",
+      modules: [
+        {
+          id: "sql-for-qa",
+          title: "SQL for Data Verification",
+          level: "Beginner → Intermediate",
+          duration: "1-2 weeks",
+          summary: "Verify what your tests actually did by querying the database: SELECT, WHERE, JOIN, aggregates, and the data checks QA engineers run most.",
+          lessons: [
+            {
+              title: "Why QA needs SQL",
+              body: [
+                { type: "p", text: "The UI and API can lie — they might show a success message while the database saved the wrong thing. SQL lets you verify data at the source." },
+                { type: "list", items: [
+                  "Confirm a record was created/updated/deleted correctly",
+                  "Set up precise test data before a run",
+                  "Investigate why a test failed by inspecting real rows",
+                  "Validate reports and aggregates against raw data",
+                ]},
+              ],
+            },
+            {
+              title: "SELECT, WHERE, ORDER BY",
+              body: [
+                { type: "p", text: "SELECT reads rows. WHERE filters them. ORDER BY sorts. This is 80% of what QA uses." },
+                { type: "code", text: "SELECT id, name, email, status\nFROM users\nWHERE status = 'active'\nORDER BY created_at DESC;" },
+                { type: "h", text: "Useful filters" },
+                { type: "code", text: "WHERE email LIKE '%@test.io'      -- pattern match\nWHERE created_at >= '2026-01-01'  -- date range\nWHERE role IN ('admin', 'qa')     -- any of a set\nWHERE verified IS NULL;           -- missing value" },
+              ],
+            },
+            {
+              title: "Counting and aggregates",
+              body: [
+                { type: "p", text: "Aggregates verify totals — great for checking that a bulk action affected the right number of rows." },
+                { type: "code", text: "SELECT COUNT(*) FROM orders WHERE status = 'paid';\n\nSELECT role, COUNT(*) AS total\nFROM users\nGROUP BY role\nHAVING COUNT(*) > 5;" },
+                { type: "p", text: "COUNT, SUM, AVG, MIN, MAX are the common ones. GROUP BY buckets rows; HAVING filters those buckets." },
+              ],
+            },
+            {
+              title: "JOINs: combining tables",
+              body: [
+                { type: "p", text: "Data is split across tables. A JOIN links them on a shared key — e.g. each order belongs to a user." },
+                { type: "code", text: "SELECT u.name, o.id AS order_id, o.total\nFROM users u\nJOIN orders o ON o.user_id = u.id\nWHERE o.status = 'paid';" },
+                { type: "list", items: [
+                  "INNER JOIN — only rows with a match in both tables",
+                  "LEFT JOIN — all rows from the left table, matched or not (NULLs where no match)",
+                ]},
+                { type: "p", text: "A LEFT JOIN helps find gaps, e.g. users with no orders:" },
+                { type: "code", text: "SELECT u.id, u.name\nFROM users u\nLEFT JOIN orders o ON o.user_id = u.id\nWHERE o.id IS NULL;" },
+              ],
+            },
+            {
+              title: "Verifying test results with SQL",
+              body: [
+                { type: "p", text: "After a test action, query the DB to confirm the real effect — then clean up." },
+                { type: "code", text: "-- after registering a user through the UI/API:\nSELECT COUNT(*) FROM users WHERE email = 'newuser@test.io';\n-- expect exactly 1\n\n-- after a 'soft delete':\nSELECT status FROM users WHERE id = 42;\n-- expect 'deleted', not a missing row\n\n-- clean up seeded data:\nDELETE FROM users WHERE email LIKE '%@test.io';" },
+                { type: "p", text: "Caution: run write queries (DELETE/UPDATE) only against test databases, always with a WHERE clause, and prefer a transaction you can roll back." },
+              ],
+            },
+          ],
+          quiz: [
+            {
+              question: "Why does a QA engineer query the database directly?",
+              options: [
+                "To replace all UI tests",
+                "To verify data at the source, since the UI/API can show success while storing wrong data",
+                "To make tests slower",
+                "SQL is required by Playwright",
+              ],
+              correct: 1,
+              explanation: "The UI can display success while the DB saved something wrong. SQL confirms the actual stored state.",
+            },
+            {
+              question: "Which clause filters rows in a SELECT?",
+              options: ["ORDER BY", "WHERE", "GROUP BY", "JOIN"],
+              correct: 1,
+              explanation: "WHERE filters which rows are returned. ORDER BY sorts, GROUP BY buckets, JOIN combines tables.",
+            },
+            {
+              question: "What does COUNT(*) return?",
+              options: [
+                "The sum of a numeric column",
+                "The number of rows matching the query",
+                "The first row",
+                "The column names",
+              ],
+              correct: 1,
+              explanation: "COUNT(*) returns how many rows match — useful to assert a bulk action touched the expected number of rows.",
+            },
+            {
+              question: "To list all users even if they have no orders, you would use…",
+              options: ["INNER JOIN", "LEFT JOIN", "WHERE only", "GROUP BY"],
+              correct: 1,
+              explanation: "A LEFT JOIN keeps every row from the left (users) table, filling NULLs where there is no matching order.",
+            },
+            {
+              question: "What is the safest practice when running a DELETE during a test?",
+              options: [
+                "Run it on production to be realistic",
+                "Always include a WHERE clause and use a test database",
+                "Delete the whole table first",
+                "Skip the WHERE clause for speed",
+              ],
+              correct: 1,
+              explanation: "Always scope writes with WHERE, run against a test DB, and prefer a transaction you can roll back.",
             },
           ],
         },
