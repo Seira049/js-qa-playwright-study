@@ -568,114 +568,493 @@ const CURRICULUM = {
             },
           ],
         },
+        {
+          id: "mock-api-data-setup",
+          title: "Mock APIs & Test Data Setup (Walkthrough)",
+          level: "Intermediate → Advanced",
+          duration: "1-2 weeks",
+          summary: "A step-by-step walkthrough: intercept and mock network calls with page.route, simulate errors and edge cases, replay recorded traffic, and build reliable test data with API seeding, fixtures, and cleanup.",
+          lessons: [
+            {
+              title: "Step 1 — Why mock, and when not to",
+              body: [
+                { type: "p", text: "Mocking replaces a real backend response with one you control. It makes UI tests fast, deterministic, and able to reach states that are hard to produce for real." },
+                { type: "list", items: [
+                  "Mock when: the backend is slow, unstable, not built yet, or you need a rare state (empty list, 500 error, timeout)",
+                  "Mock when: testing UI behavior in isolation (loading spinners, error banners, pagination)",
+                  "Don't mock when: you are verifying the real integration — keep some end-to-end tests that hit the real API",
+                ]},
+                { type: "p", text: "Rule of thumb: mock to test the UI, use real APIs to test the system. A healthy suite has both." },
+              ],
+            },
+            {
+              title: "Step 2 — Intercept a request with page.route",
+              body: [
+                { type: "p", text: "page.route registers a handler for URLs matching a pattern. Register it BEFORE the page makes the call — usually before page.goto." },
+                { type: "code", text: "import { test, expect } from '@playwright/test';\n\ntest('shows users from a mocked API', async ({ page }) => {\n  await page.route('**/api/users', async (route) => {\n    await route.fulfill({\n      status: 200,\n      json: [\n        { id: 1, name: 'Ana', role: 'qa' },\n        { id: 2, name: 'Ben', role: 'admin' },\n      ],\n    });\n  });\n\n  await page.goto('/users');\n  await expect(page.getByRole('listitem')).toHaveCount(2);\n  await expect(page.getByText('Ana')).toBeVisible();\n});" },
+                { type: "list", items: [
+                  "'**/api/users' — glob pattern; you can also pass a RegExp or a predicate function",
+                  "route.fulfill — respond with your own status, headers, and body/json",
+                  "The real backend is never called for that URL",
+                ]},
+              ],
+            },
+            {
+              title: "Step 3 — Simulate errors and edge cases",
+              body: [
+                { type: "p", text: "This is where mocking pays off: states that are painful to create against a real server become one-liners." },
+                { type: "code", text: "// Server error -> UI should show an error banner\nawait page.route('**/api/users', (route) =>\n  route.fulfill({ status: 500, json: { message: 'Internal error' } })\n);\n\n// Empty state\nawait page.route('**/api/users', (route) => route.fulfill({ status: 200, json: [] }));\n\n// Network failure (no response at all)\nawait page.route('**/api/users', (route) => route.abort('failed'));\n\n// Slow response -> loading spinner should appear\nawait page.route('**/api/users', async (route) => {\n  await new Promise((r) => setTimeout(r, 2000));\n  await route.fulfill({ status: 200, json: [] });\n});" },
+                { type: "p", text: "Then assert the UI reacts correctly, e.g. await expect(page.getByRole('alert')).toContainText('Something went wrong')." },
+              ],
+            },
+            {
+              title: "Step 4 — Modify a real response",
+              body: [
+                { type: "p", text: "Sometimes you want the real data with one field changed. route.fetch() calls the real server, then you tweak the result before handing it to the page." },
+                { type: "code", text: "await page.route('**/api/profile', async (route) => {\n  const response = await route.fetch();          // real call\n  const body = await response.json();\n  body.accountStatus = 'locked';                  // force an edge case\n  await route.fulfill({ response, json: body });  // keep real headers/status\n});" },
+                { type: "p", text: "To let a request pass through untouched (for example, only mocking some calls), use route.continue(). You can also change headers on the way out." },
+                { type: "code", text: "await page.route('**/api/**', async (route) => {\n  if (route.request().method() === 'GET') return route.continue();\n  return route.fulfill({ status: 403, json: { message: 'Read-only mode' } });\n});" },
+              ],
+            },
+            {
+              title: "Step 5 — Verify what the app sent",
+              body: [
+                { type: "p", text: "Mocks can also act as spies. Capture the request to assert the UI sent the right payload." },
+                { type: "code", text: "test('form sends the correct payload', async ({ page }) => {\n  let sentBody;\n  await page.route('**/api/users', async (route) => {\n    sentBody = route.request().postDataJSON();\n    await route.fulfill({ status: 201, json: { id: 99, ...sentBody } });\n  });\n\n  await page.goto('/users/new');\n  await page.getByLabel('Name').fill('Ana');\n  await page.getByLabel('Role').selectOption('qa');\n  await page.getByRole('button', { name: 'Save' }).click();\n\n  await expect(page.getByText('User created')).toBeVisible();\n  expect(sentBody).toEqual({ name: 'Ana', role: 'qa' });\n});" },
+                { type: "p", text: "Alternative without mocking: const req = await page.waitForRequest('**/api/users') and inspect req.postDataJSON()." },
+              ],
+            },
+            {
+              title: "Step 6 — Record and replay with HAR files",
+              body: [
+                { type: "p", text: "For pages that make many calls, record real traffic once into a HAR file and replay it in later runs." },
+                { type: "code", text: "// First run: record (update: true writes the HAR)\nawait page.routeFromHAR('tests/hars/dashboard.har', {\n  url: '**/api/**',\n  update: true,\n});\n\n// Later runs: replay from the file (set update: false or remove it)\nawait page.routeFromHAR('tests/hars/dashboard.har', { url: '**/api/**' });" },
+                { type: "p", text: "Commit the HAR, review it for sensitive data (tokens, personal info) before committing, and re-record when the API contract changes." },
+              ],
+            },
+            {
+              title: "Step 7 — Seed test data through the API",
+              body: [
+                { type: "p", text: "Mocks fake the backend; seeding prepares the REAL backend. Create the exact data a test needs through the API instead of clicking through the UI." },
+                { type: "code", text: "test('edit an existing user', async ({ page, request }) => {\n  // Arrange: create data via API (fast, reliable)\n  const res = await request.post('/api/users', {\n    data: { name: `qa-user-${Date.now()}`, role: 'qa' },\n  });\n  expect(res.ok()).toBeTruthy();\n  const user = await res.json();\n\n  // Act: test the UI against real data\n  await page.goto(`/users/${user.id}/edit`);\n  await page.getByLabel('Role').selectOption('admin');\n  await page.getByRole('button', { name: 'Save' }).click();\n\n  // Assert\n  await expect(page.getByText('Saved')).toBeVisible();\n\n  // Cleanup\n  await request.delete(`/api/users/${user.id}`);\n});" },
+                { type: "p", text: "Unique values (timestamps or random IDs) keep parallel tests from colliding on the same record." },
+              ],
+            },
+            {
+              title: "Step 8 — Package setup and cleanup in a custom fixture",
+              body: [
+                { type: "p", text: "Move seeding into a fixture with test.extend. Code before use() is setup; code after use() is teardown, and it runs even if the test fails." },
+                { type: "code", text: "// fixtures.ts\nimport { test as base, expect } from '@playwright/test';\n\ntype User = { id: number; name: string; role: string };\n\nexport const test = base.extend<{ seededUser: User }>({\n  seededUser: async ({ request }, use) => {\n    const res = await request.post('/api/users', {\n      data: { name: `qa-user-${Date.now()}`, role: 'qa' },\n    });\n    const user: User = await res.json();\n\n    await use(user);                          // test runs here\n\n    await request.delete(`/api/users/${user.id}`); // always cleaned up\n  },\n});\nexport { expect };" },
+                { type: "code", text: "// users.spec.ts\nimport { test, expect } from './fixtures';\n\ntest('profile shows seeded user', async ({ page, seededUser }) => {\n  await page.goto(`/users/${seededUser.id}`);\n  await expect(page.getByRole('heading')).toHaveText(seededUser.name);\n});" },
+              ],
+            },
+            {
+              title: "Step 9 — Log in once with a setup project",
+              body: [
+                { type: "p", text: "Logging in through the UI in every test is slow. Authenticate once, save the session to a file, and reuse it everywhere." },
+                { type: "code", text: "// tests/auth.setup.ts\nimport { test as setup, expect } from '@playwright/test';\n\nsetup('authenticate', async ({ page }) => {\n  await page.goto('/login');\n  await page.getByLabel('Email').fill(process.env.QA_USER!);\n  await page.getByLabel('Password').fill(process.env.QA_PASSWORD!);\n  await page.getByRole('button', { name: 'Sign in' }).click();\n  await expect(page).toHaveURL(/dashboard/);\n  await page.context().storageState({ path: 'playwright/.auth/user.json' });\n});" },
+                { type: "code", text: "// playwright.config.ts (excerpt)\nprojects: [\n  { name: 'setup', testMatch: /.*\\.setup\\.ts/ },\n  {\n    name: 'chromium',\n    use: { storageState: 'playwright/.auth/user.json' },\n    dependencies: ['setup'],\n  },\n]," },
+                { type: "list", items: [
+                  "Credentials come from environment variables — never hardcode them",
+                  "Add playwright/.auth/ to .gitignore — the file holds live session cookies",
+                ]},
+              ],
+            },
+          ],
+          quiz: [
+            {
+              question: "When must you register page.route for a call made on page load?",
+              options: [
+                "After the assertion",
+                "Before page.goto",
+                "After page.goto finishes",
+                "Only inside afterEach",
+              ],
+              correct: 1,
+              explanation: "The route must exist before the request is made. Register it before navigating, or the real request goes through.",
+            },
+            {
+              question: "Which call responds to an intercepted request with your own data?",
+              options: ["route.continue()", "route.abort()", "route.fulfill()", "route.request()"],
+              correct: 2,
+              explanation: "route.fulfill sends a custom status/headers/body. continue passes it through; abort simulates a network failure.",
+            },
+            {
+              question: "How do you return the real response with one field changed?",
+              options: [
+                "route.abort() then retry",
+                "route.fetch(), edit the JSON, then route.fulfill({ response, json })",
+                "Edit the database directly",
+                "It is not possible in Playwright",
+              ],
+              correct: 1,
+              explanation: "route.fetch() performs the real request; you modify the parsed body and fulfill with it, keeping real headers and status.",
+            },
+            {
+              question: "In a test.extend fixture, where does cleanup code go?",
+              options: [
+                "Before use()",
+                "After await use(...)",
+                "In a separate test",
+                "Cleanup is not supported",
+              ],
+              correct: 1,
+              explanation: "Code after await use() runs as teardown once the test finishes, even when the test fails.",
+            },
+            {
+              question: "Why add playwright/.auth/ to .gitignore?",
+              options: [
+                "It makes tests faster",
+                "The storage state file holds live session cookies/tokens",
+                "Git cannot store JSON",
+                "Playwright requires it",
+              ],
+              correct: 1,
+              explanation: "storageState saves real session cookies and tokens. Committing it would leak a usable login.",
+            },
+            {
+              question: "What is the best reason to keep some tests that hit the real API?",
+              options: [
+                "Mocks are not allowed in CI",
+                "Mocks cannot catch real integration and contract breaks",
+                "Real APIs are always faster",
+                "Playwright cannot mock POST requests",
+              ],
+              correct: 1,
+              explanation: "Mocks only prove the UI handles the data you invented. Real-API tests catch backend changes and integration bugs.",
+            },
+          ],
+        },
       ],
     },
     {
       name: "SQL for QA",
       modules: [
         {
-          id: "sql-for-qa",
-          title: "SQL for Data Verification",
-          level: "Beginner → Intermediate",
-          duration: "1-2 weeks",
-          summary: "Verify what your tests actually did by querying the database: SELECT, WHERE, JOIN, aggregates, and the data checks QA engineers run most.",
+          id: "sql-beginner",
+          title: "SQL Fundamentals",
+          level: "Beginner",
+          duration: "1 week",
+          summary: "Read data with confidence: tables and rows, SELECT, filtering with WHERE, sorting and limiting, handling NULL, and safe writes.",
           lessons: [
             {
               title: "Why QA needs SQL",
               body: [
-                { type: "p", text: "The UI and API can lie — they might show a success message while the database saved the wrong thing. SQL lets you verify data at the source." },
+                { type: "p", text: "The UI and API can show a success message while the database saved the wrong thing. SQL lets you verify data at the source." },
                 { type: "list", items: [
-                  "Confirm a record was created/updated/deleted correctly",
-                  "Set up precise test data before a run",
-                  "Investigate why a test failed by inspecting real rows",
-                  "Validate reports and aggregates against raw data",
+                  "Confirm a record was created, updated, or deleted correctly",
+                  "Find or prepare precise test data before a run",
+                  "Investigate a failed test by inspecting the real rows",
+                  "Validate reports and totals against raw data",
                 ]},
               ],
             },
             {
-              title: "SELECT, WHERE, ORDER BY",
+              title: "Tables, rows, and columns",
               body: [
-                { type: "p", text: "SELECT reads rows. WHERE filters them. ORDER BY sorts. This is 80% of what QA uses." },
-                { type: "code", text: "SELECT id, name, email, status\nFROM users\nWHERE status = 'active'\nORDER BY created_at DESC;" },
-                { type: "h", text: "Useful filters" },
-                { type: "code", text: "WHERE email LIKE '%@test.io'      -- pattern match\nWHERE created_at >= '2026-01-01'  -- date range\nWHERE role IN ('admin', 'qa')     -- any of a set\nWHERE verified IS NULL;           -- missing value" },
+                { type: "p", text: "A relational database stores data in tables. Each row is one record; each column is one field with a type." },
+                { type: "code", text: "users\n+----+-------+------------------+--------+---------------------+\n| id | name  | email            | status | created_at          |\n+----+-------+------------------+--------+---------------------+\n|  1 | Ana   | ana@test.io      | active | 2026-03-01 09:12:00 |\n|  2 | Ben   | ben@test.io      | locked | 2026-03-04 14:40:00 |\n+----+-------+------------------+--------+---------------------+" },
+                { type: "p", text: "The primary key (id) uniquely identifies each row. Other tables reference it with a foreign key, e.g. orders.user_id points to users.id." },
               ],
             },
             {
-              title: "Counting and aggregates",
+              title: "SELECT and WHERE",
               body: [
-                { type: "p", text: "Aggregates verify totals — great for checking that a bulk action affected the right number of rows." },
-                { type: "code", text: "SELECT COUNT(*) FROM orders WHERE status = 'paid';\n\nSELECT role, COUNT(*) AS total\nFROM users\nGROUP BY role\nHAVING COUNT(*) > 5;" },
-                { type: "p", text: "COUNT, SUM, AVG, MIN, MAX are the common ones. GROUP BY buckets rows; HAVING filters those buckets." },
+                { type: "p", text: "SELECT picks columns. FROM names the table. WHERE filters rows. List the columns you need instead of SELECT * so results stay readable." },
+                { type: "code", text: "SELECT id, name, email, status\nFROM users\nWHERE status = 'active';" },
+                { type: "h", text: "Common operators" },
+                { type: "code", text: "WHERE age >= 18                       -- comparison: = <> < > <= >=\nWHERE status = 'active' AND role = 'qa' -- both true\nWHERE role = 'admin' OR role = 'qa'     -- either true\nWHERE role IN ('admin', 'qa')           -- any of a set\nWHERE email LIKE '%@test.io'            -- % = any characters\nWHERE created_at BETWEEN '2026-01-01' AND '2026-01-31'" },
               ],
             },
             {
-              title: "JOINs: combining tables",
+              title: "Sorting, limiting, and distinct values",
               body: [
-                { type: "p", text: "Data is split across tables. A JOIN links them on a shared key — e.g. each order belongs to a user." },
-                { type: "code", text: "SELECT u.name, o.id AS order_id, o.total\nFROM users u\nJOIN orders o ON o.user_id = u.id\nWHERE o.status = 'paid';" },
+                { type: "code", text: "-- newest 10 users\nSELECT id, name, created_at\nFROM users\nORDER BY created_at DESC\nLIMIT 10;\n\n-- every status value that exists in the table\nSELECT DISTINCT status FROM users;" },
+                { type: "p", text: "SELECT DISTINCT status is a quick way to spot an unexpected value (a typo like 'actve') that the app saved." },
+                { type: "p", text: "Syntax note: LIMIT works in PostgreSQL, MySQL, and SQLite. SQL Server uses SELECT TOP 10, and Oracle uses FETCH FIRST 10 ROWS ONLY." },
+              ],
+            },
+            {
+              title: "NULL: the missing value",
+              body: [
+                { type: "p", text: "NULL means 'no value'. It is not equal to anything, not even another NULL, so = NULL never matches." },
+                { type: "code", text: "WHERE verified = NULL      -- WRONG: always returns no rows\nWHERE verified IS NULL     -- correct\nWHERE verified IS NOT NULL -- correct\n\n-- show a default instead of NULL\nSELECT name, COALESCE(phone, 'none') AS phone FROM users;" },
+                { type: "p", text: "Many 'missing data' bugs show up as unexpected NULLs. Check required columns with IS NULL after a create flow." },
+              ],
+            },
+            {
+              title: "INSERT, UPDATE, DELETE — safely",
+              body: [
+                { type: "code", text: "INSERT INTO users (name, email, status)\nVALUES ('QA Temp', 'qa.temp@test.io', 'active');\n\nUPDATE users SET status = 'locked'\nWHERE email = 'qa.temp@test.io';\n\nDELETE FROM users\nWHERE email = 'qa.temp@test.io';" },
                 { type: "list", items: [
-                  "INNER JOIN — only rows with a match in both tables",
-                  "LEFT JOIN — all rows from the left table, matched or not (NULLs where no match)",
+                  "Only write to a TEST database — never production",
+                  "Always include a WHERE clause on UPDATE and DELETE; without it, every row changes",
+                  "Run the same WHERE as a SELECT first to preview which rows will be affected",
                 ]},
-                { type: "p", text: "A LEFT JOIN helps find gaps, e.g. users with no orders:" },
-                { type: "code", text: "SELECT u.id, u.name\nFROM users u\nLEFT JOIN orders o ON o.user_id = u.id\nWHERE o.id IS NULL;" },
-              ],
-            },
-            {
-              title: "Verifying test results with SQL",
-              body: [
-                { type: "p", text: "After a test action, query the DB to confirm the real effect — then clean up." },
-                { type: "code", text: "-- after registering a user through the UI/API:\nSELECT COUNT(*) FROM users WHERE email = 'newuser@test.io';\n-- expect exactly 1\n\n-- after a 'soft delete':\nSELECT status FROM users WHERE id = 42;\n-- expect 'deleted', not a missing row\n\n-- clean up seeded data:\nDELETE FROM users WHERE email LIKE '%@test.io';" },
-                { type: "p", text: "Caution: run write queries (DELETE/UPDATE) only against test databases, always with a WHERE clause, and prefer a transaction you can roll back." },
               ],
             },
           ],
           quiz: [
             {
-              question: "Why does a QA engineer query the database directly?",
-              options: [
-                "To replace all UI tests",
-                "To verify data at the source, since the UI/API can show success while storing wrong data",
-                "To make tests slower",
-                "SQL is required by Playwright",
-              ],
-              correct: 1,
-              explanation: "The UI can display success while the DB saved something wrong. SQL confirms the actual stored state.",
-            },
-            {
               question: "Which clause filters rows in a SELECT?",
-              options: ["ORDER BY", "WHERE", "GROUP BY", "JOIN"],
+              options: ["ORDER BY", "WHERE", "DISTINCT", "LIMIT"],
               correct: 1,
-              explanation: "WHERE filters which rows are returned. ORDER BY sorts, GROUP BY buckets, JOIN combines tables.",
+              explanation: "WHERE filters rows. ORDER BY sorts, DISTINCT removes duplicates, LIMIT caps the number returned.",
             },
             {
-              question: "What does COUNT(*) return?",
+              question: "How do you find rows where phone has no value?",
+              options: ["WHERE phone = NULL", "WHERE phone IS NULL", "WHERE phone = ''", "WHERE phone == NULL"],
+              correct: 1,
+              explanation: "NULL is never equal to anything, so = NULL matches nothing. Use IS NULL.",
+            },
+            {
+              question: "What does `LIKE '%@test.io'` match?",
               options: [
-                "The sum of a numeric column",
-                "The number of rows matching the query",
-                "The first row",
-                "The column names",
+                "Only the exact text %@test.io",
+                "Any value ending in @test.io",
+                "Any value starting with @test.io",
+                "Nothing — LIKE needs a number",
               ],
               correct: 1,
-              explanation: "COUNT(*) returns how many rows match — useful to assert a bulk action touched the expected number of rows.",
+              explanation: "% matches any sequence of characters, so the pattern matches anything that ends with @test.io.",
             },
             {
-              question: "To list all users even if they have no orders, you would use…",
-              options: ["INNER JOIN", "LEFT JOIN", "WHERE only", "GROUP BY"],
-              correct: 1,
-              explanation: "A LEFT JOIN keeps every row from the left (users) table, filling NULLs where there is no matching order.",
-            },
-            {
-              question: "What is the safest practice when running a DELETE during a test?",
+              question: "What happens if you run `DELETE FROM users;` with no WHERE?",
               options: [
-                "Run it on production to be realistic",
-                "Always include a WHERE clause and use a test database",
-                "Delete the whole table first",
-                "Skip the WHERE clause for speed",
+                "It deletes nothing",
+                "It deletes every row in the table",
+                "It deletes the first row only",
+                "It returns an error by default in every database",
               ],
               correct: 1,
-              explanation: "Always scope writes with WHERE, run against a test DB, and prefer a transaction you can roll back.",
+              explanation: "With no WHERE clause, DELETE removes every row. Always scope writes and preview with SELECT first.",
+            },
+          ],
+        },
+        {
+          id: "sql-intermediate",
+          title: "Intermediate SQL: Joins & Aggregates",
+          level: "Intermediate",
+          duration: "1-2 weeks",
+          summary: "Combine tables with JOINs, summarize with GROUP BY and HAVING, branch with CASE, and run the data-integrity checks QA uses to find real defects.",
+          lessons: [
+            {
+              title: "Aggregates and GROUP BY",
+              body: [
+                { type: "p", text: "Aggregate functions summarize many rows into one value: COUNT, SUM, AVG, MIN, MAX." },
+                { type: "code", text: "SELECT COUNT(*) FROM orders WHERE status = 'paid';\n\nSELECT SUM(total) AS revenue, AVG(total) AS avg_order\nFROM orders\nWHERE status = 'paid';" },
+                { type: "p", text: "GROUP BY splits rows into buckets and computes the aggregate per bucket. HAVING filters the buckets (WHERE filters rows before grouping)." },
+                { type: "code", text: "SELECT status, COUNT(*) AS total\nFROM orders\nGROUP BY status\nHAVING COUNT(*) > 10\nORDER BY total DESC;" },
+              ],
+            },
+            {
+              title: "INNER JOIN and LEFT JOIN",
+              body: [
+                { type: "p", text: "Data is split across tables. A JOIN links them on a shared key — each order belongs to a user through orders.user_id." },
+                { type: "code", text: "SELECT u.name, o.id AS order_id, o.total\nFROM users u\nINNER JOIN orders o ON o.user_id = u.id\nWHERE o.status = 'paid';" },
+                { type: "list", items: [
+                  "INNER JOIN — only rows that match in both tables",
+                  "LEFT JOIN — every row from the left table; NULLs where there is no match",
+                ]},
+                { type: "p", text: "A LEFT JOIN with IS NULL finds gaps — here, users who never placed an order:" },
+                { type: "code", text: "SELECT u.id, u.name\nFROM users u\nLEFT JOIN orders o ON o.user_id = u.id\nWHERE o.id IS NULL;" },
+              ],
+            },
+            {
+              title: "Joining more than two tables",
+              body: [
+                { type: "code", text: "SELECT u.name, o.id AS order_id, p.name AS product, oi.quantity\nFROM orders o\nJOIN users u        ON u.id = o.user_id\nJOIN order_items oi ON oi.order_id = o.id\nJOIN products p     ON p.id = oi.product_id\nWHERE o.id = 1001;" },
+                { type: "p", text: "Short aliases (u, o, oi, p) keep long joins readable. Watch for row multiplication: joining a one-to-many table repeats the parent row once per child, which inflates COUNT and SUM if you are not careful." },
+              ],
+            },
+            {
+              title: "CASE expressions",
+              body: [
+                { type: "p", text: "CASE adds if/else logic inside a query — useful for labeling or bucketing results." },
+                { type: "code", text: "SELECT id, total,\n  CASE\n    WHEN total >= 1000 THEN 'high'\n    WHEN total >= 100  THEN 'medium'\n    ELSE 'low'\n  END AS tier\nFROM orders;\n\n-- count several conditions in one pass\nSELECT\n  SUM(CASE WHEN status = 'paid'    THEN 1 ELSE 0 END) AS paid,\n  SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending\nFROM orders;" },
+              ],
+            },
+            {
+              title: "Data-integrity checks that find real bugs",
+              body: [
+                { type: "p", text: "These queries come up again and again in QA. Each one should return zero rows on healthy data." },
+                { type: "code", text: "-- 1. Duplicates that should be unique\nSELECT email, COUNT(*) AS n\nFROM users\nGROUP BY email\nHAVING COUNT(*) > 1;\n\n-- 2. Orphans: child rows pointing at a missing parent\nSELECT oi.id\nFROM order_items oi\nLEFT JOIN orders o ON o.id = oi.order_id\nWHERE o.id IS NULL;\n\n-- 3. Totals that don't add up\nSELECT o.id, o.total, SUM(oi.quantity * oi.unit_price) AS computed\nFROM orders o\nJOIN order_items oi ON oi.order_id = o.id\nGROUP BY o.id, o.total\nHAVING o.total <> SUM(oi.quantity * oi.unit_price);\n\n-- 4. Required fields left empty\nSELECT id FROM users WHERE email IS NULL OR email = '';" },
+              ],
+            },
+          ],
+          quiz: [
+            {
+              question: "What is the difference between WHERE and HAVING?",
+              options: [
+                "They are identical",
+                "WHERE filters rows before grouping; HAVING filters groups after aggregation",
+                "HAVING filters rows; WHERE filters groups",
+                "HAVING only works with JOIN",
+              ],
+              correct: 1,
+              explanation: "WHERE runs before GROUP BY on individual rows. HAVING runs after, on the aggregated groups.",
+            },
+            {
+              question: "To list all users including those with no orders, use…",
+              options: ["INNER JOIN", "LEFT JOIN from users", "WHERE only", "GROUP BY"],
+              correct: 1,
+              explanation: "A LEFT JOIN keeps every row from the left table (users), filling NULLs where there is no matching order.",
+            },
+            {
+              question: "Which query finds duplicate emails?",
+              options: [
+                "SELECT DISTINCT email FROM users",
+                "SELECT email, COUNT(*) FROM users GROUP BY email HAVING COUNT(*) > 1",
+                "SELECT * FROM users ORDER BY email",
+                "SELECT email FROM users WHERE email IS NULL",
+              ],
+              correct: 1,
+              explanation: "Group by email and keep only groups with more than one row — those are the duplicates.",
+            },
+            {
+              question: "An 'orphan' row is…",
+              options: [
+                "A row with no columns",
+                "A child row whose foreign key points to a parent that does not exist",
+                "The first row of a table",
+                "A row with a NULL primary key",
+              ],
+              correct: 1,
+              explanation: "Orphans reference a missing parent, e.g. order_items for a deleted order. LEFT JOIN + IS NULL finds them.",
+            },
+            {
+              question: "Why can a SUM be wrong after joining a one-to-many table?",
+              options: [
+                "SUM ignores joins",
+                "The parent row repeats once per child, inflating the total",
+                "JOIN removes all numbers",
+                "SUM only works on one table",
+              ],
+              correct: 1,
+              explanation: "Each child row duplicates the parent row's values, so summing a parent column counts it multiple times.",
+            },
+          ],
+        },
+        {
+          id: "sql-advanced",
+          title: "Advanced SQL for Test Automation",
+          level: "Advanced",
+          duration: "2 weeks",
+          summary: "Subqueries, CTEs, window functions, transactions, and query plans — then wire SQL into Playwright tests to verify and prepare data automatically.",
+          lessons: [
+            {
+              title: "Subqueries and EXISTS",
+              body: [
+                { type: "p", text: "A subquery is a query inside another query. Use it to compare against a computed value or a set." },
+                { type: "code", text: "-- orders above the average order value\nSELECT id, total\nFROM orders\nWHERE total > (SELECT AVG(total) FROM orders);\n\n-- users who have at least one refunded order\nSELECT u.id, u.name\nFROM users u\nWHERE EXISTS (\n  SELECT 1 FROM orders o\n  WHERE o.user_id = u.id AND o.status = 'refunded'\n);" },
+                { type: "p", text: "EXISTS stops at the first match and handles NULLs safely. Prefer NOT EXISTS over NOT IN when the subquery can return NULL — NOT IN with a NULL returns no rows at all." },
+              ],
+            },
+            {
+              title: "CTEs: readable multi-step queries",
+              body: [
+                { type: "p", text: "A Common Table Expression (WITH ...) names an intermediate result so complex checks read top to bottom." },
+                { type: "code", text: "WITH paid_orders AS (\n  SELECT user_id, SUM(total) AS spent\n  FROM orders\n  WHERE status = 'paid'\n  GROUP BY user_id\n),\nvip AS (\n  SELECT user_id FROM paid_orders WHERE spent >= 5000\n)\nSELECT u.id, u.name, u.tier\nFROM users u\nJOIN vip v ON v.user_id = u.id\nWHERE u.tier <> 'VIP';   -- defect: should be VIP but isn't" },
+                { type: "p", text: "This pattern turns a business rule ('spend 5000 → VIP') into a query that returns violations. Zero rows means the rule holds." },
+              ],
+            },
+            {
+              title: "Window functions",
+              body: [
+                { type: "p", text: "Window functions compute across related rows without collapsing them like GROUP BY does." },
+                { type: "code", text: "-- latest login per user\nSELECT * FROM (\n  SELECT user_id, logged_in_at,\n         ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY logged_in_at DESC) AS rn\n  FROM login_events\n) t\nWHERE rn = 1;\n\n-- detect a status that went backwards (e.g. shipped -> pending)\nSELECT order_id, status, changed_at,\n       LAG(status) OVER (PARTITION BY order_id ORDER BY changed_at) AS prev_status\nFROM order_status_history;" },
+                { type: "list", items: [
+                  "ROW_NUMBER / RANK — position within a group",
+                  "LAG / LEAD — previous / next row's value",
+                  "SUM(...) OVER (...) — running totals",
+                ]},
+              ],
+            },
+            {
+              title: "Transactions and isolated test data",
+              body: [
+                { type: "p", text: "A transaction groups statements so they all succeed or all roll back. In tests, it lets you change data and undo it completely." },
+                { type: "code", text: "BEGIN;\n\nUPDATE accounts SET balance = balance - 100 WHERE id = 1;\nUPDATE accounts SET balance = balance + 100 WHERE id = 2;\n\nSELECT id, balance FROM accounts WHERE id IN (1, 2); -- inspect\n\nROLLBACK;  -- undo everything (use COMMIT to keep it)" },
+                { type: "p", text: "Note: a rollback only undoes work done on that same connection. If the app under test writes through its own connection, clean up with targeted DELETEs on your test-tagged rows instead." },
+              ],
+            },
+            {
+              title: "Reading a query plan",
+              body: [
+                { type: "p", text: "Slow test-data queries slow the whole suite, and they often hint at a production performance problem. EXPLAIN shows how the database runs a query." },
+                { type: "code", text: "EXPLAIN ANALYZE\nSELECT * FROM orders WHERE user_id = 42;" },
+                { type: "list", items: [
+                  "Seq Scan on a large table — reads every row; often means a missing index",
+                  "Index Scan — uses an index; usually what you want for selective filters",
+                  "Compare estimated vs actual rows — large gaps mean stale statistics",
+                ]},
+                { type: "p", text: "EXPLAIN ANALYZE is PostgreSQL syntax. MySQL 8 supports EXPLAIN ANALYZE too; SQL Server uses execution plans in its tooling." },
+              ],
+            },
+            {
+              title: "Running SQL from Playwright tests",
+              body: [
+                { type: "p", text: "Combine UI or API actions with database assertions in one test. This example uses the pg client for PostgreSQL (install with npm i -D pg); other databases have equivalent clients." },
+                { type: "code", text: "// db-fixture.ts\nimport { test as base } from '@playwright/test';\nimport { Pool } from 'pg';\n\nexport const test = base.extend<{}, { db: Pool }>({\n  db: [async ({}, use) => {\n    const pool = new Pool({ connectionString: process.env.TEST_DATABASE_URL });\n    await use(pool);\n    await pool.end();\n  }, { scope: 'worker' }],\n});\nexport { expect } from '@playwright/test';" },
+                { type: "code", text: "// signup.spec.ts\nimport { test, expect } from './db-fixture';\n\ntest('signup stores exactly one active user', async ({ page, db }) => {\n  const email = `qa+${Date.now()}@test.io`;\n\n  await page.goto('/signup');\n  await page.getByLabel('Email').fill(email);\n  await page.getByLabel('Password').fill('Str0ng!Pass');\n  await page.getByRole('button', { name: 'Create account' }).click();\n  await expect(page.getByText('Welcome')).toBeVisible();\n\n  // parameterized query — never build SQL with string concatenation\n  const { rows } = await db.query(\n    'SELECT status FROM users WHERE email = $1',\n    [email]\n  );\n  expect(rows).toHaveLength(1);\n  expect(rows[0].status).toBe('active');\n\n  await db.query('DELETE FROM users WHERE email = $1', [email]);\n});" },
+                { type: "list", items: [
+                  "Connection string comes from an environment variable pointing at a TEST database",
+                  "Parameterized queries ($1, $2) prevent SQL injection and quoting bugs",
+                  "Worker-scoped fixture: one pool per worker, closed when the worker finishes",
+                ]},
+              ],
+            },
+          ],
+          quiz: [
+            {
+              question: "Why prefer NOT EXISTS over NOT IN with a subquery?",
+              options: [
+                "NOT IN is not valid SQL",
+                "NOT IN returns no rows if the subquery contains a NULL",
+                "NOT EXISTS is always slower",
+                "They behave identically in every case",
+              ],
+              correct: 1,
+              explanation: "If the subquery yields a NULL, NOT IN evaluates to unknown for every row and returns nothing. NOT EXISTS is NULL-safe.",
+            },
+            {
+              question: "What does a CTE (WITH ...) mainly give you?",
+              options: [
+                "A permanent new table",
+                "A named intermediate result that makes multi-step queries readable",
+                "Automatic indexing",
+                "A backup of the database",
+              ],
+              correct: 1,
+              explanation: "A CTE names a sub-result for the duration of the query so complex logic reads step by step.",
+            },
+            {
+              question: "Which window function gets the previous row's value within a partition?",
+              options: ["ROW_NUMBER", "LEAD", "LAG", "COUNT"],
+              correct: 2,
+              explanation: "LAG returns the previous row's value in the window order; LEAD returns the next one.",
+            },
+            {
+              question: "What does ROLLBACK do inside a transaction?",
+              options: [
+                "Saves all changes",
+                "Undoes every change made since BEGIN on that connection",
+                "Deletes the table",
+                "Restarts the database",
+              ],
+              correct: 1,
+              explanation: "ROLLBACK discards all uncommitted changes from that transaction. COMMIT would keep them.",
+            },
+            {
+              question: "In a Playwright DB check, how should you pass the email into the query?",
+              options: [
+                "Concatenate it: \"... WHERE email = '\" + email + \"'\"",
+                "As a parameter: db.query('... WHERE email = $1', [email])",
+                "Hardcode a production email",
+                "Skip the WHERE clause",
+              ],
+              correct: 1,
+              explanation: "Parameterized queries prevent SQL injection and quoting errors. Never build SQL from string concatenation.",
             },
           ],
         },
