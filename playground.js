@@ -84,7 +84,7 @@
     // JavaScript files: report syntax errors only (no type checking).
     ts.javascriptDefaults.setDiagnosticsOptions({ noSemanticValidation: true, noSyntaxValidation: false });
     ts.typescriptDefaults.setEagerModelSync(true);
-    const bookTypes = "declare const __book: {\n  logs: string[];\n  calls: unknown[][];\n  errors: string[];\n  check(label: string, pass: boolean): void;\n};\n";
+    const bookTypes = "declare const __book: {\n  logs: string[];\n  calls: unknown[][];\n  errors: string[];\n  source: string;\n  check(label: string, pass: boolean): void;\n  test(label: string, fn: () => unknown): void;\n};\n";
     ts.typescriptDefaults.addExtraLib(bookTypes, "file:///book-globals.d.ts");
     ts.javascriptDefaults.addExtraLib(bookTypes, "file:///book-globals.d.ts");
     monaco.editor.setTheme("vs-dark");
@@ -158,7 +158,7 @@
    * Runs JavaScript. Returns { stop(), finished: Promise<"done"|"timeout"|"stopped"> }.
    * onEvent receives { type: "log"|"error"|"check", ... } messages.
    */
-  function runJs(js, onEvent) {
+  function runJs(js, onEvent, source) {
     const worker = new Worker("runner.js");
     let settle;
     const finished = new Promise((r) => { settle = r; });
@@ -180,7 +180,7 @@
       onEvent({ type: "error", text: e.message || "The code could not run." });
       end("done");
     };
-    worker.postMessage({ code: js });
+    worker.postMessage({ code: js, source });
     return { stop: () => end("stopped"), finished };
   }
 
@@ -256,7 +256,7 @@
           result.checks.push(msg);
           out.check(msg.label, msg.pass);
         }
-      });
+      }, opts.source);
       result.reason = await handle.finished;
       statusLine.remove();
       if (result.reason === "timeout") out.status(`Stopped after ${TIME_LIMIT_MS / 1000} seconds (time limit). Check for a loop that never ends.`);

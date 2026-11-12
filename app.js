@@ -322,7 +322,7 @@
       const userLines = code.split("\n").length;
       checkBtn.disabled = true;
       stopBtn.disabled = false;
-      const run = window.Playground.execute(code + "\n;\n" + ex.checks, ex.lang, outEl, { userLines });
+      const run = window.Playground.execute(code + "\n;\n" + ex.checks, ex.lang, outEl, { userLines, source: code });
       current = run;
       const r = await run.finished;
       if (current !== run) return;

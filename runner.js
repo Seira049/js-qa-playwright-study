@@ -458,6 +458,14 @@
   Object.defineProperty(self, "console", { value: fakeConsole, configurable: true, writable: true });
 
   book.check = (label, pass) => post({ type: "check", label: String(label), pass: !!pass });
+  // Like check(), but takes a function, so a missing variable counts as a failed
+  // check instead of stopping the remaining checks.
+  book.test = (label, fn) => {
+    let pass = false;
+    try { pass = !!fn(); } catch { pass = false; }
+    book.check(label, pass);
+  };
+  book.source = ""; // the learner's own code (exercises only)
   book.inspect = inspect;
   self.__book = book;
 
@@ -523,7 +531,8 @@
   });
 
   self.onmessage = async (e) => {
-    const { code } = e.data;
+    const { code, source } = e.data;
+    book.source = typeof source === "string" ? source : "";
     const url = URL.createObjectURL(new Blob([code], { type: "text/javascript" }));
     try {
       await import(url);
