@@ -26,11 +26,8 @@ window.BOOK = {
         { id: "js-08", number: 8, title: "Modules: import and export", file: "chapters/js-08-modules.md", minutes: 40 },
         { id: "js-09", number: 9, title: "Classes", file: "chapters/js-09-classes.md", minutes: 50 },
         { id: "js-10", number: 10, title: "Asynchronous Code: Promises and async/await", file: "chapters/js-10-async-promises.md", minutes: 55 },
-        { id: "js-11", number: 11, title: "TypeScript: Types, Interfaces, and Narrowing", planned: true },
-        { id: "js-12", number: 12, title: "TypeScript: Generics, Utility Types, and tsconfig", planned: true },
-        { legacy: "js-basics" },
-        { legacy: "async-js" },
-        { legacy: "ts-for-qa" },
+        { id: "js-11", number: 11, title: "TypeScript: Types, Interfaces, and Narrowing", file: "chapters/js-11-ts-types-narrowing.md", minutes: 55 },
+        { id: "js-12", number: 12, title: "TypeScript: Generics, Utility Types, and tsconfig", file: "chapters/js-12-ts-generics-utility-tsconfig.md", minutes: 50 },
       ],
     },
     {
