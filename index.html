@@ -3,31 +3,66 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JS for QA — Playwright Automation</title>
-  <meta name="description" content="A self-paced study path for QA engineers learning test automation with JavaScript and Playwright." />
+  <title>JavaScript &amp; TypeScript for QA — Interactive Book</title>
+  <meta name="description" content="An interactive book for QA engineers: learn JavaScript and TypeScript, then apply them with Playwright. Every example runs in your browser." />
   <link rel="stylesheet" href="styles.css" />
+  <!-- Markdown parser for chapters (pinned version + integrity hash). Must load before the editor's AMD loader. -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@18.2.0/lib/marked.umd.js"
+          integrity="sha384-DDYDxilZ1LlqPSbaRHlrwh12h+3fUewuQj7HjscrZIWt5bGyQ+n0DHtIoZE3i3zU"
+          crossorigin="anonymous"></script>
 </head>
 <body>
   <header class="site-header">
-    <div class="wrap">
-      <a class="brand" href="#/" id="brand">
-        <span class="brand-mark">▸</span> JS for QA
-      </a>
+    <div class="header-inner">
+      <button class="toc-toggle" id="toc-toggle" aria-label="Show contents">☰</button>
+      <a class="brand" href="#/"><span class="brand-mark">▸</span> JS &amp; TS for QA</a>
       <nav class="site-nav">
         <button class="reset-btn" id="reset-progress" title="Clear saved progress">Reset progress</button>
       </nav>
     </div>
   </header>
 
-  <main id="app" class="wrap"></main>
+  <div class="callout warn file-warning" id="file-warning" hidden>
+    This book needs to be opened through a local web server (the code runner and chapters can't load from a <code>file://</code> page).
+    In a terminal, go to this folder and run <code>python3 -m http.server 8000</code>, then open <a href="http://localhost:8000">http://localhost:8000</a>.
+  </div>
+
+  <div class="layout">
+    <aside class="toc" id="toc" aria-label="Contents"></aside>
+    <main id="app" class="content"></main>
+  </div>
+
+  <button class="pg-toggle" id="pg-toggle" title="Playground (Ctrl + `)">&lt;/&gt; Playground</button>
+
+  <aside class="playground" id="playground" aria-hidden="true" aria-label="Playground">
+    <div class="pg-bar">
+      <strong>Playground</strong>
+      <div class="pg-lang" role="group" aria-label="Language">
+        <button data-lang="ts">TypeScript</button>
+        <button data-lang="js">JavaScript</button>
+      </div>
+      <span class="pg-spacer"></span>
+      <button class="btn-sm" data-act="run" title="Ctrl/Cmd + Enter">▶ Run</button>
+      <button class="btn-sm ghost" data-act="stop" disabled>Stop</button>
+      <button class="btn-sm ghost" data-act="clear">Clear output</button>
+      <button class="btn-sm ghost" data-act="reset">Reset code</button>
+      <button class="btn-sm ghost" data-act="close" aria-label="Close playground">✕</button>
+    </div>
+    <div class="pg-editor"></div>
+    <div class="pg-output-wrap">
+      <div class="pg-output-title">Output</div>
+      <div class="pg-output run-output"></div>
+    </div>
+    <div class="pg-note">Runs in your browser (not Node.js). Type checking uses the TypeScript version built into the editor. Press Ctrl + ` to open or close.</div>
+  </aside>
 
   <footer class="site-footer">
-    <div class="wrap">
-      <small>Learn Playwright automation with JavaScript · progress saved locally in your browser</small>
-    </div>
+    <small>Progress and code are saved in this browser only.</small>
   </footer>
 
   <script src="curriculum.js"></script>
+  <script src="book.js"></script>
+  <script src="playground.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

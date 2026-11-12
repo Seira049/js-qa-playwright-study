@@ -1,61 +1,73 @@
-# JS for QA — Playwright Automation
+# JavaScript & TypeScript for QA — Interactive Book
 
-A self-paced study app for QA engineers learning test automation with **JavaScript and Playwright**. Modeled on a phases → modules → lessons curriculum, with a knowledge check per module and progress saved in your browser.
+An interactive book for QA engineers: learn **JavaScript and TypeScript** properly, then apply them with **Playwright**. Examples run in your browser, each chapter has an exercise that checks your answer and a short quiz, and there is a playground for writing and running your own code.
 
-## Curriculum
+## Contents
 
-1. **JavaScript Foundations** — the JS you actually use in test code
-2. **Async JavaScript** — promises & async/await (the backbone of Playwright)
-3. **TypeScript for QA** — types, interfaces, and typed Playwright tests
-4. **Getting Started with Playwright** — setup and your first test
-5. **Locators & Selectors** — resilient, user-facing locators
-6. **Actions & Assertions** — web-first assertions and auto-waiting
-7. **Test Organization** — fixtures, hooks, Page Object Model
-8. **API Testing**
-   - API Testing with Playwright — status codes, auth, validation, negative tests
-   - Mock APIs & Test Data Setup — a 9-step walkthrough: `page.route`, error simulation, HAR replay, API seeding, fixtures, auth setup
-9. **SQL for QA**
-   - SQL Fundamentals (Beginner) — SELECT, WHERE, NULL, safe writes
-   - Intermediate SQL — JOINs, GROUP BY/HAVING, CASE, data-integrity checks
-   - Advanced SQL — subqueries, CTEs, window functions, transactions, SQL in Playwright tests
-10. **Debugging & CI** — traces, the inspector, and running in CI
+- **Part 1 — JavaScript & TypeScript** (being rewritten one chapter at a time)
+  1. How Your Code Runs ✓ reviewed
+  2. Values, Variables, and Types
+  3. Operators, Equality, and Truthiness
+  4. Strings and Template Literals
+  5. Arrays and Objects
+  6. Functions
+  7. Control Flow and Errors
+  8. Modules: import and export
+  9. Classes
+  10. Asynchronous Code: Promises and async/await
+  11. TypeScript: Types, Interfaces, and Narrowing
+  12. TypeScript: Generics, Utility Types, and tsconfig
+- **Part 2 — Playwright**: setup, locators, actions and assertions, fixtures and the Page Object Model
+- **Part 3 — API Testing & Test Data**: the `request` fixture, mocking with `page.route`, HAR replay, seeding data
+- **Part 4 — Debugging & CI**
+- **Appendix (optional) — SQL for QA**: beginner, intermediate, advanced
+
+**Reviewed** chapters are checked against MDN, the TypeScript Handbook, the Node.js docs, and playwright.dev, and every example is run. Each lists its sources. Sections marked **draft** come from the first version of this guide and haven't been re-checked yet.
 
 ## Run locally
 
-It is a static site — open it directly:
+The book must be served over HTTP (chapters and the code runner can't load from `file://`):
 
 ```bash
-open index.html
+python3 -m http.server 8000   # then open http://localhost:8000
 ```
 
-Or serve it:
+An internet connection is needed for the code editor (Monaco) and the Markdown parser, which load from a pinned CDN version.
 
-```bash
-python3 -m http.server 8000   # http://localhost:8000
-```
+## How the playground works
 
-## Deploy
+- Code runs in a Web Worker in your browser (not Node.js) and is stopped after 10 seconds.
+- TypeScript is checked and converted by the TypeScript service built into Monaco. As with `node file.ts` and Playwright, code still runs when there are type errors; the errors are listed with the output.
+- `console.log` output is formatted like Node.js's `util.inspect` for everyday values.
 
-This repo is set up for **Vercel** (static, zero config beyond `vercel.json`). Connect the repo in Vercel or run:
+## Writing chapters
 
-```bash
-vercel          # preview
-vercel --prod   # production
-```
+Reviewed chapters are Markdown files in `chapters/`, listed in `book.js`. Special code fences:
 
-## Add content
+| Fence | Meaning |
+|---|---|
+| ` ```ts run ` / ` ```js run ` | Runnable example (▶ Run and Open in playground) |
+| ` ```output ` | Expected output, shown under the previous example |
+| ` ```exercise ts title="…" ` | Exercise starter code |
+| ` ```checks ` | Hidden checks run after the learner's code. Use `__book.check(label, pass)`, `__book.logs` (printed lines), `__book.calls` (raw `console.log` arguments) |
+| ` ```solution ` | Optional solution |
+| ` ```quiz ` | JSON array of `{ q, code?, options, answer, why }` |
 
-Edit `curriculum.js`. Each module has `lessons` (content blocks) and a `quiz`. New phases/modules render automatically.
+Draft modules still live in `curriculum.js` and are removed as each is rewritten.
 
 ## Project structure
 
 ```
 js-qa-study-app/
-├── index.html       # shell + header/footer
+├── index.html       # page shell: header, contents sidebar, playground drawer
 ├── styles.css       # dark theme
-├── curriculum.js    # all study content (edit this)
-├── app.js           # SPA router, rendering, progress tracking
-├── vercel.json      # Vercel static config
+├── book.js          # table of contents (parts and chapters)
+├── chapters/        # reviewed chapters (Markdown)
+├── curriculum.js    # earlier draft modules (not yet reviewed)
+├── app.js           # router, chapter rendering, quizzes, exercises, progress
+├── playground.js    # Monaco editor, TypeScript checking, running code
+├── runner.js        # Web Worker that runs code and formats console output
+├── vercel.json
 └── README.md
 ```
 
