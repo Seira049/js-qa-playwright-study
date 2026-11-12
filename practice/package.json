@@ -1,0 +1,16 @@
+{
+  "name": "js-qa-book-practice",
+  "private": true,
+  "description": "Practice project for the Playwright chapters of the JS & TS for QA book.",
+  "type": "module",
+  "scripts": {
+    "serve": "node server.mjs",
+    "test": "playwright test",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.0",
+    "@types/node": "^24.0.0",
+    "typescript": "^7.0.2"
+  }
+}

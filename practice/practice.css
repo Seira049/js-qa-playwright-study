@@ -1,0 +1,15 @@
+body { font-family: system-ui, sans-serif; margin: 0; background: #f6f7f9; color: #1d2330; }
+main { max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+.card { background: #fff; border: 1px solid #dde1e8; border-radius: 12px; padding: 1.5rem; max-width: 380px; }
+label { display: block; margin: 0.8rem 0 0.25rem; font-weight: 600; }
+label.inline { display: inline-flex; gap: 0.4rem; align-items: center; font-weight: 400; }
+input[type=email], input[type=password], input[type=search], select { width: 100%; padding: 0.5rem; border: 1px solid #c5ccd8; border-radius: 6px; box-sizing: border-box; }
+button { margin-top: 1rem; padding: 0.5rem 1rem; border: 0; border-radius: 6px; background: #1f6feb; color: #fff; font-weight: 600; cursor: pointer; }
+button:disabled { background: #9aa4b2; cursor: default; }
+.error { color: #b42318; margin: 0.8rem 0 0; }
+.bar { display: flex; justify-content: space-between; padding: 0.8rem 1.25rem; background: #fff; border-bottom: 1px solid #dde1e8; }
+.products { list-style: none; padding: 0; display: grid; gap: 0.75rem; }
+.products li { background: #fff; border: 1px solid #dde1e8; border-radius: 10px; padding: 0.75rem 1rem; }
+.products h2 { font-size: 1.05rem; margin: 0 0 0.25rem; }
+.price { color: #475467; }
+section[aria-label=Filters] { background: #fff; border: 1px solid #dde1e8; border-radius: 10px; padding: 0.25rem 1rem 1rem; }

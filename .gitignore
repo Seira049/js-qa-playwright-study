@@ -8,3 +8,9 @@ Thumbs.db
 # Node (if you later add tooling)
 node_modules/
 npm-debug.log*
+# Practice Playwright project
+practice/test-results/
+practice/playwright-report/
+practice/playwright/.auth/
+practice/blob-report/
+practice/node_modules

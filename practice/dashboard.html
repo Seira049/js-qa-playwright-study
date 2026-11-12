@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Practice Shop – Dashboard</title>
+  <link rel="stylesheet" href="practice.css" />
+</head>
+<body>
+  <!-- Practice page for the book's Playwright chapters.
+       Products are loaded from api/products.json, so tests can mock that request. -->
+  <header class="bar">
+    <strong>Practice Shop</strong>
+    <span>Cart: <span data-testid="cart-count">0</span></span>
+  </header>
+  <main>
+    <h1>Dashboard</h1>
+    <p class="welcome"></p>
+
+    <section aria-label="Filters">
+      <label for="sort">Sort by</label>
+      <select id="sort">
+        <option value="name">Name</option>
+        <option value="price-asc">Price: low to high</option>
+        <option value="price-desc">Price: high to low</option>
+      </select>
+      <label class="inline"><input type="checkbox" id="in-stock" /> In stock only</label>
+      <label for="search">Search</label>
+      <input id="search" type="search" placeholder="Search products" />
+    </section>
+
+    <p class="status" role="status">Loading products…</p>
+    <ul class="products" aria-label="Products"></ul>
+
+    <button id="clear-cart" type="button">Clear cart</button>
+  </main>
+  <script>
+    let products = [];
+    let cartCount = 0;
+    const list = document.querySelector(".products");
+    const status = document.querySelector(".status");
+    const countEl = document.querySelector("[data-testid=cart-count]");
+    const user = localStorage.getItem("practice-user");
+    document.querySelector(".welcome").textContent = user ? `Signed in as ${user}` : "Not signed in";
+
+    function render() {
+      const sort = document.getElementById("sort").value;
+      const inStockOnly = document.getElementById("in-stock").checked;
+      const q = document.getElementById("search").value.trim().toLowerCase();
+      let shown = products.filter((p) => (!inStockOnly || p.inStock) && p.name.toLowerCase().includes(q));
+      shown = shown.toSorted((a, b) =>
+        sort === "price-asc" ? a.price - b.price : sort === "price-desc" ? b.price - a.price : a.name.localeCompare(b.name));
+      list.innerHTML = "";
+      for (const p of shown) {
+        const li = document.createElement("li");
+        li.innerHTML = `<h2></h2><span class="price"></span>
+          <button type="button">Add to cart</button>`;
+        li.querySelector("h2").textContent = p.name;
+        li.querySelector(".price").textContent = `$${p.price.toFixed(2)}`;
+        const btn = li.querySelector("button");
+        if (!p.inStock) { btn.disabled = true; btn.textContent = "Out of stock"; }
+        btn.addEventListener("click", () => { cartCount++; countEl.textContent = String(cartCount); });
+        list.appendChild(li);
+      }
+      status.textContent = shown.length ? `${shown.length} product${shown.length === 1 ? "" : "s"}` : "No products found";
+    }
+
+    async function load() {
+      try {
+        const res = await fetch("api/products.json");
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        products = await res.json();
+        render();
+      } catch (err) {
+        status.textContent = "Could not load products. Please try again.";
+      }
+    }
+
+    document.getElementById("sort").addEventListener("change", render);
+    document.getElementById("in-stock").addEventListener("change", render);
+    document.getElementById("search").addEventListener("input", render);
+    document.getElementById("clear-cart").addEventListener("click", () => {
+      if (confirm("Remove all items from the cart?")) { cartCount = 0; countEl.textContent = "0"; }
+    });
+    load();
+  </script>
+</body>
+</html>
