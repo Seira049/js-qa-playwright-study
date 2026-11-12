@@ -144,7 +144,7 @@ Test files end in `.spec.ts` (or `.test.ts`). Playwright finds them inside `test
 | `npx playwright test --last-failed` | re-run only the tests that failed last time |
 | `npx playwright show-report` | open the last HTML report |
 
-When a run finishes, the terminal shows a summary like this (from the practice project):
+When a run finishes, the terminal shows a summary like this (from an early run of the practice project, which has more tests now):
 
 ```text
 Running 9 tests using 5 workers

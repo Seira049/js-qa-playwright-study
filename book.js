@@ -5,6 +5,7 @@
  *   { id, number, title, file, minutes }   a reviewed chapter written in Markdown (chapters/*.md)
  *   { id, number, title, planned: true }  listed in the contents, not written yet
  *   { legacy: "<module id>" }             an older module from curriculum.js, not yet reviewed
+ * Optional `label` replaces the default "Chapter <number>" (e.g. "Appendix A").
  *
  * A part with `optional: true` is shown as optional and is not counted in overall progress.
  */
@@ -32,35 +33,35 @@ window.BOOK = {
     },
     {
       title: "Playwright",
-      intro: "Writing end-to-end tests with Playwright Test.",
+      intro: "Writing end-to-end tests with Playwright Test. These chapters run on your computer against the practice project in the practice/ folder.",
       chapters: [
-        { legacy: "pw-setup" },
-        { legacy: "pw-locators" },
-        { legacy: "pw-assertions" },
-        { legacy: "pw-fixtures" },
+        { id: "pw-01", number: 13, title: "Setting Up Playwright and Your First Test", file: "chapters/pw-01-setup-first-test.md", minutes: 35 },
+        { id: "pw-02", number: 14, title: "Locators", file: "chapters/pw-02-locators.md", minutes: 40 },
+        { id: "pw-03", number: 15, title: "Actions and Assertions", file: "chapters/pw-03-actions-assertions.md", minutes: 45 },
+        { id: "pw-04", number: 16, title: "Organizing Tests: Hooks, Page Objects, Fixtures, and Sign-in", file: "chapters/pw-04-organizing-tests.md", minutes: 55 },
       ],
     },
     {
       title: "API Testing & Test Data",
       chapters: [
-        { legacy: "api-testing" },
-        { legacy: "mock-api-data-setup" },
+        { id: "pw-05", number: 17, title: "API Testing", file: "chapters/pw-05-api-testing.md", minutes: 45 },
+        { id: "pw-06", number: 18, title: "Mocking the Network and Managing Test Data", file: "chapters/pw-06-mocking-test-data.md", minutes: 50 },
       ],
     },
     {
       title: "Debugging & CI",
       chapters: [
-        { legacy: "pw-ci" },
+        { id: "pw-07", number: 19, title: "Debugging, Flaky Tests, and CI", file: "chapters/pw-07-debugging-ci.md", minutes: 40 },
       ],
     },
     {
       title: "Appendix: SQL for QA",
       optional: true,
-      intro: "Optional. Useful when you need to check what an application saved to its database.",
+      intro: "Optional. Useful when you need to check what an application saved to its database. Every query runs in your browser.",
       chapters: [
-        { legacy: "sql-beginner" },
-        { legacy: "sql-intermediate" },
-        { legacy: "sql-advanced" },
+        { id: "sql-01", number: "A", label: "Appendix A", title: "SQL Fundamentals", file: "chapters/sql-01-fundamentals.md", minutes: 45 },
+        { id: "sql-02", number: "B", label: "Appendix B", title: "Joins, Aggregates, and Integrity Checks", file: "chapters/sql-02-joins-aggregates.md", minutes: 45 },
+        { id: "sql-03", number: "C", label: "Appendix C", title: "Advanced SQL and SQL in Tests", file: "chapters/sql-03-advanced.md", minutes: 45 },
       ],
     },
   ],

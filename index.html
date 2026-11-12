@@ -40,6 +40,7 @@
       <div class="pg-lang" role="group" aria-label="Language">
         <button data-lang="ts">TypeScript</button>
         <button data-lang="js">JavaScript</button>
+        <button data-lang="sql">SQL</button>
       </div>
       <span class="pg-spacer"></span>
       <button class="btn-sm" data-act="run" title="Ctrl/Cmd + Enter">▶ Run</button>
@@ -53,14 +54,13 @@
       <div class="pg-output-title">Output</div>
       <div class="pg-output run-output"></div>
     </div>
-    <div class="pg-note">Runs in your browser (not Node.js). Type checking uses the TypeScript version built into the editor. Press Ctrl + ` to open or close.</div>
+    <div class="pg-note">Runs in your browser (not Node.js). TypeScript is checked by the version built into the editor; SQL runs on SQLite (sql.js) with a fresh sample database each time. Press Ctrl + ` to open or close.</div>
   </aside>
 
   <footer class="site-footer">
     <small>Progress and code are saved in this browser only.</small>
   </footer>
 
-  <script src="curriculum.js"></script>
   <script src="book.js"></script>
   <script src="playground.js"></script>
   <script src="app.js"></script>

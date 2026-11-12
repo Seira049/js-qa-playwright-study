@@ -402,7 +402,7 @@ npx playwright test --grep @negative
 
 ## Sources
 
-All code shown was run with Playwright Test 1.65.0 against the practice project: 21 tests passed, `--grep @smoke` selected 3, and `tsc --noEmit` reported no problems.
+All code shown was run with Playwright Test 1.65.0 against the practice project: the whole suite passed, `--grep @smoke` selected 3 tests, and `tsc --noEmit` reported no problems.
 
 - Playwright, *Writing tests* and *Annotations* (`describe`, hooks, tags, `skip`, `fixme`, `fail`, `test.step`): [playwright.dev/docs/writing-tests](https://playwright.dev/docs/writing-tests), [playwright.dev/docs/test-annotations](https://playwright.dev/docs/test-annotations)
 - Playwright, *Isolation* (browser contexts are like incognito profiles): [playwright.dev/docs/browser-contexts](https://playwright.dev/docs/browser-contexts)

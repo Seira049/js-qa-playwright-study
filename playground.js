@@ -221,7 +221,65 @@
    * Returns { stop, finished: Promise<{ reason, checks, problems, errors }> }.
    * `userLines` limits reported type errors to the learner's own code.
    */
+  let schemaPromise = null;
+  function loadSchema() {
+    if (!schemaPromise) {
+      schemaPromise = fetch("chapters/sql/shop.sql").then((r) => {
+        if (!r.ok) throw new Error(`Could not load the sample database (HTTP ${r.status}).`);
+        return r.text();
+      });
+      schemaPromise.catch(() => { schemaPromise = null; });
+    }
+    return schemaPromise;
+  }
+
+  /** Runs SQL against a fresh copy of the sample database (sql.js in a worker). */
+  function executeSql(code, outputEl) {
+    const out = createOutput(outputEl);
+    const statusLine = out.status("Running SQL…");
+    const result = { checks: [], problems: [], errors: 0, reason: "done", texts: [] };
+    let settle = null;
+    let stopped = false;
+    const finished = (async () => {
+      let schema;
+      try {
+        schema = await loadSchema();
+      } catch (err) {
+        statusLine.remove();
+        out.error(err.message);
+        result.reason = "error";
+        return result;
+      }
+      if (stopped) { statusLine.textContent = "Stopped."; result.reason = "stopped"; return result; }
+      const worker = new Worker("sql-runner.js");
+      result.reason = await new Promise((resolve) => {
+        settle = resolve;
+        const timer = setTimeout(() => resolve("timeout"), TIME_LIMIT_MS);
+        worker.onmessage = (e) => {
+          const m = e.data;
+          if (m.type === "done") { clearTimeout(timer); resolve("done"); }
+          else if (m.type === "error") { result.errors++; out.error(m.text); }
+          else { out.log((result.texts.length ? "\n" : "") + m.text); result.texts.push(m.text); }
+        };
+        worker.onerror = (e) => {
+          e.preventDefault();
+          out.error(e.message || "The SQL engine could not load. Check your internet connection.");
+          clearTimeout(timer);
+          resolve("done");
+        };
+        worker.postMessage({ sql: code, schema });
+      });
+      worker.terminate();
+      statusLine.remove();
+      if (result.reason === "timeout") out.status(`Stopped after ${TIME_LIMIT_MS / 1000} seconds (time limit).`);
+      else if (result.reason === "stopped") out.status("Stopped.");
+      return result;
+    })();
+    return { stop() { stopped = true; if (settle) settle("stopped"); }, finished };
+  }
+
   function execute(code, lang, outputEl, opts = {}) {
+    if (lang === "sql") return executeSql(code, outputEl);
     const out = createOutput(outputEl);
     const statusLine = out.status(lang === "ts" ? "Checking types and running…" : "Running…");
     const result = { checks: [], problems: [], errors: 0, reason: "done" };
@@ -277,6 +335,7 @@
   const STARTERS = {
     js: "// Write JavaScript here, then press Run (Ctrl/Cmd + Enter).\nconsole.log(\"Hello, QA!\");\n",
     ts: "// Write TypeScript here, then press Run (Ctrl/Cmd + Enter).\nconst passed: number = 5;\nconsole.log(\"Passed:\", passed);\n",
+    sql: "-- Write SQL here, then press Run (Ctrl/Cmd + Enter).\n-- Tables: customers, products, orders, order_items\nSELECT * FROM customers;\n",
   };
 
   function loadState() {
@@ -305,8 +364,9 @@
     const models = {
       js: monaco.editor.createModel(state.js ?? STARTERS.js, "javascript", monaco.Uri.parse("file:///playground.js")),
       ts: monaco.editor.createModel(state.ts ?? STARTERS.ts, "typescript", monaco.Uri.parse("file:///playground.ts")),
+      sql: monaco.editor.createModel(state.sql ?? STARTERS.sql, "sql", monaco.Uri.parse("file:///playground.sql")),
     };
-    const lang = state.lang === "js" ? "js" : "ts";
+    const lang = ["js", "ts", "sql"].includes(state.lang) ? state.lang : "ts";
     const editor = monaco.editor.create(host, editorOptions({ model: models[lang] }));
     pg = { editor, models, lang, run: null };
 
@@ -314,11 +374,13 @@
       const s = loadState();
       s.js = models.js.getValue();
       s.ts = models.ts.getValue();
+      s.sql = models.sql.getValue();
       s.lang = pg.lang;
       saveState(s);
     };
     models.js.onDidChangeContent(persist);
     models.ts.onDidChangeContent(persist);
+    models.sql.onDidChangeContent(persist);
 
     root.querySelectorAll(".pg-lang button").forEach((b) => {
       b.classList.toggle("active", b.dataset.lang === lang);
@@ -422,7 +484,7 @@
     const uri = monaco.Uri.parse(`file:///${uriName}.${lang}`);
     const existing = monaco.editor.getModel(uri);
     if (existing) existing.dispose();
-    const model = monaco.editor.createModel(code, lang === "ts" ? "typescript" : "javascript", uri);
+    const model = monaco.editor.createModel(code, lang === "ts" ? "typescript" : lang === "sql" ? "sql" : "javascript", uri);
     const lines = code.split("\n").length;
     host.style.height = Math.max(160, Math.min(460, lines * 20 + 24)) + "px";
     host.innerHTML = "";

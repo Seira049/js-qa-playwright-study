@@ -69,7 +69,7 @@
   const readable = entries.filter((e) => e.kind !== "planned");
   const counted = readable.filter((e) => !e.optional);
   const findEntry = (id) => readable.find((e) => e.id === id);
-  const chapterLabel = (e) => (e.number ? `Chapter ${e.number}` : e.kind === "legacy" ? "Earlier draft" : "");
+  const chapterLabel = (e) => (e.label ? e.label : e.number ? `Chapter ${e.number}` : e.kind === "legacy" ? "Earlier draft" : "");
 
   // ---------------------------------------------------------------------------
   // Sidebar
@@ -112,7 +112,7 @@
         <div class="stats">
           <span><b>${done}/${counted.length}</b> chapters complete</span>
           <span><b>${reviewedCount}</b> reviewed chapter${reviewedCount === 1 ? "" : "s"}</span>
-          <span><b>${plannedCount}</b> chapter${plannedCount === 1 ? "" : "s"} planned</span>
+          ${plannedCount ? `<span><b>${plannedCount}</b> chapter${plannedCount === 1 ? "" : "s"} planned</span>` : ""}
         </div>
         <div class="overall-progress" aria-label="Overall progress ${pct}%"><span style="width:${pct}%"></span></div>
       </section>
@@ -120,10 +120,10 @@
       <section class="how">
         <h2>How this book works</h2>
         <ul>
-          <li><b>Read, then run.</b> Examples marked <span class="pill">▶ Run</span> run in your browser. Change them in the playground and run them again.</li>
+          <li><b>Read, then run.</b> JavaScript, TypeScript, and SQL examples marked <span class="pill">▶ Run</span> run in your browser. Change them in the playground and run them again.</li>
           <li><b>Practise.</b> Each chapter ends with an exercise that checks your answer, and a short quiz.</li>
           <li><b>Checked against the docs.</b> Chapters marked <span class="pill ok">✓ Reviewed</span> were checked against MDN, the TypeScript Handbook, the Node.js docs, and playwright.dev, and every example was run. Each one lists its sources at the end.</li>
-          <li><b>Earlier drafts</b> from the first version of this guide are still available and marked <span class="pill warn">draft</span>. They haven't been re-checked yet, and each will be rewritten as a reviewed chapter.</li>
+          <li><b>Playwright on your computer.</b> Part 2 onwards uses real browsers, so those examples run on your machine against the practice project in the <code>practice/</code> folder. Chapter 13 shows how to set it up.</li>
         </ul>
       </section>
 
@@ -189,7 +189,7 @@
         return `<div class="quiz-slot" data-quiz="${quizzes.length - 1}"></div>`;
       }
       const lang = LANG_ALIAS[info.kind] || info.kind || "text";
-      const runnable = info.flags.includes("run") && (lang === "js" || lang === "ts");
+      const runnable = info.flags.includes("run") && (lang === "js" || lang === "ts" || lang === "sql");
       const actions = runnable
         ? `<span class="code-actions"><button class="btn-sm" data-act="run">▶ Run</button><button class="btn-sm ghost" data-act="stop" hidden>Stop</button><button class="btn-sm ghost" data-act="edit">Open in playground</button></span>`
         : `<span class="code-actions"><button class="btn-sm ghost" data-act="copy">Copy</button></span>`;
@@ -322,7 +322,9 @@
       const userLines = code.split("\n").length;
       checkBtn.disabled = true;
       stopBtn.disabled = false;
-      const run = window.Playground.execute(code + "\n;\n" + ex.checks, ex.lang, outEl, { userLines, source: code });
+      const run = ex.lang === "sql"
+        ? window.Playground.execute(code, "sql", outEl)
+        : window.Playground.execute(code + "\n;\n" + ex.checks, ex.lang, outEl, { userLines, source: code });
       current = run;
       const r = await run.finished;
       if (current !== run) return;
@@ -333,6 +335,18 @@
 
       const summary = document.createElement("div");
       summary.className = "ex-summary";
+      if (ex.lang === "sql") {
+        // SQL exercises: the result must match the expected table exactly.
+        const expected = ex.checks.trim();
+        const pass = r.errors === 0 && r.texts.join("\n\n").trim() === expected;
+        r.checks = [{ label: "The query returns the expected result", pass }];
+        if (!pass) {
+          const hint = document.createElement("div");
+          hint.className = "out-line out-status";
+          hint.textContent = "Expected result:\n" + expected;
+          outEl.appendChild(hint);
+        }
+      }
       const passedChecks = r.checks.filter((c) => c.pass).length;
       const allPass = r.checks.length > 0 && passedChecks === r.checks.length && r.problems.length === 0 && r.errors === 0;
       if (allPass) {
