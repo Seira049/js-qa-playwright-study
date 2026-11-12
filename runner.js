@@ -479,10 +479,15 @@
   let finished = false;
 
   function maybeFinish() {
-    if (moduleDone && pending.size === 0 && !finished) {
-      finished = true;
-      realSetTimeout(() => post({ type: "done" }), 0);
-    }
+    if (!moduleDone || finished || pending.size !== 0) return;
+    // Wait one more turn: promise callbacks that run after a timer can start
+    // new timers (e.g. an async function awaiting several delays in a row).
+    realSetTimeout(() => {
+      if (pending.size === 0 && !finished) {
+        finished = true;
+        post({ type: "done" });
+      }
+    }, 0);
   }
   self.setTimeout = (fn, ms, ...args) => {
     const id = realSetTimeout(() => {

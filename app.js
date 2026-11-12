@@ -337,7 +337,7 @@
       const allPass = r.checks.length > 0 && passedChecks === r.checks.length && r.problems.length === 0 && r.errors === 0;
       if (allPass) {
         summary.classList.add("pass");
-        summary.textContent = `All ${r.checks.length} checks passed.`;
+        summary.textContent = r.checks.length === 1 ? "The check passed." : `All ${r.checks.length} checks passed.`;
         const s = exerciseStore(); s.passed[key] = true; writeStore(EXERCISE_KEY, s);
         state.textContent = "✅ Passed";
       } else if (r.errors > 0 && r.checks.length === 0) {
