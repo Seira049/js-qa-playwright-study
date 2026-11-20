@@ -8,7 +8,7 @@ A **locator** describes how to find an element on the page. Good locators are th
 - how to filter and chain locators to target one item in a list
 - how to read every matching element's text
 
-All examples run against the practice project (`practice/tests/locators.spec.ts`), with Playwright 1.65.0.
+All examples run against the practice project (`practice/tests/locators.spec.ts`), with Playwright 1.65.1.
 
 ## 14.1 The built-in locators
 
@@ -234,7 +234,7 @@ await expect(cable.getByText("$9.50")).toBeVisible();
 
 ## Sources
 
-Every test shown was run with Playwright Test 1.65.0 against the practice project. The strict-mode error is the real output.
+Every test shown was run with Playwright Test 1.65.1 against the practice project. The strict-mode error is the real output.
 
 - Playwright, *Locators* (recommended locators, quotes on role and text locators and on CSS/XPath, filtering, strictness, `first`/`nth`): [playwright.dev/docs/locators](https://playwright.dev/docs/locators)
 - Playwright, *Other locators* (CSS and XPath): [playwright.dev/docs/other-locators](https://playwright.dev/docs/other-locators)

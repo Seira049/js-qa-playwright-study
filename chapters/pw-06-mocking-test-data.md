@@ -10,7 +10,7 @@ Real backends are slow, change, and rarely fail on demand. To test how a page ha
 - recording and replaying traffic with HAR files
 - creating test data through the API in a fixture, with automatic cleanup
 
-The dashboard in the practice project loads its products with `fetch("api/products.json")`. All tests are in `practice/tests/mocking.spec.ts` and `practice/tests/test-data.spec.ts`, run with Playwright 1.65.0.
+The dashboard in the practice project loads its products with `fetch("api/products.json")`. All tests are in `practice/tests/mocking.spec.ts` and `practice/tests/test-data.spec.ts`, run with Playwright 1.65.1.
 
 ## 18.1 Mock or not?
 
@@ -324,7 +324,7 @@ test("recovers after a failed first load", async ({ page }) => {
 
 ## Sources
 
-Every test shown, including the solutions, was run with Playwright Test 1.65.0 against the practice project. The HAR recording and replay were also run, and the fixture's cleanup was confirmed by checking the server's data afterwards.
+Every test shown, including the solutions, was run with Playwright Test 1.65.1 against the practice project. The HAR recording and replay were also run, and the fixture's cleanup was confirmed by checking the server's data afterwards.
 
 - Playwright, *Mock APIs* (`page.route`, `fulfill`, modifying responses, HAR): [playwright.dev/docs/mock](https://playwright.dev/docs/mock)
 - Playwright, *Network* (`abort`, `continue`, glob patterns, `waitForResponse`): [playwright.dev/docs/network](https://playwright.dev/docs/network)

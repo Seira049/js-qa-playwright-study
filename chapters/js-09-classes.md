@@ -260,7 +260,7 @@ constructor(baseUrl: string) {
 }
 ```
 
-Because the shortcut **generates** JavaScript, it isn't plain type annotation, and **Node.js's type stripping refuses it**: `node file.ts` fails with `ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX: TypeScript parameter property is not supported in strip-only mode`. Playwright Test transforms TypeScript itself, so parameter properties **do** work in Playwright tests (checked with Playwright 1.65.0), and so does the playground. If you want code that also runs with `node file.ts`, write the field and the assignment out in full, as the official Playwright docs do.
+Because the shortcut **generates** JavaScript, it isn't plain type annotation, and **Node.js's type stripping refuses it**: `node file.ts` fails with `ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX: TypeScript parameter property is not supported in strip-only mode`. Playwright Test transforms TypeScript itself, so parameter properties **do** work in Playwright tests (checked with Playwright 1.65.1), and so does the playground. If you want code that also runs with `node file.ts`, write the field and the assignment out in full, as the official Playwright docs do.
 
 ## 9.7 A Playwright page object
 
@@ -458,7 +458,7 @@ console.log(reporter.lines);
 
 ## Sources
 
-Every example was run with Node.js v24.18.0, and the TypeScript messages were produced by TypeScript 7.0.2. Parameter-property support was checked with Node.js type stripping and with Playwright Test 1.65.0.
+Every example was run with Node.js v24.18.0, and the TypeScript messages were produced by TypeScript 7.0.2. Parameter-property support was checked with Node.js type stripping and with Playwright Test 1.65.1.
 
 - MDN, *Classes*: [developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes) (fields, getters, `static`, `extends`, `super`)
 - MDN, *Private elements*: [developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Private_elements](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Private_elements)

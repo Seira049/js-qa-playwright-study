@@ -383,7 +383,7 @@ ORDER BY units_sold DESC, p.name;
 
 ## Sources
 
-Every query and result was run with SQLite 3.54.1 (through sql.js 1.16.0), the same engine the ▶ Run buttons use.
+Every query and result was run with SQLite 3.54.1 (through sql.js 1.17.0), the same engine the ▶ Run buttons use.
 
 - SQLite, *SELECT* (joins, `GROUP BY`, `HAVING`): [sqlite.org/lang_select.html](https://www.sqlite.org/lang_select.html)
 - SQLite, *Aggregate functions*: [sqlite.org/lang_aggfunc.html](https://www.sqlite.org/lang_aggfunc.html)

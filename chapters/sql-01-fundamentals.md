@@ -447,7 +447,7 @@ ORDER BY price;
 
 ## Sources
 
-Every query and result was run with SQLite 3.54.1 (through sql.js 1.16.0), the same engine the ▶ Run buttons use.
+Every query and result was run with SQLite 3.54.1 (through sql.js 1.17.0), the same engine the ▶ Run buttons use.
 
 - SQLite, *SELECT*: [sqlite.org/lang_select.html](https://www.sqlite.org/lang_select.html)
 - SQLite, *SQL expressions* (`LIKE`, `IS NULL`, `BETWEEN`, `IN`): [sqlite.org/lang_expr.html](https://www.sqlite.org/lang_expr.html)

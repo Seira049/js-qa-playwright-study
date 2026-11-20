@@ -10,7 +10,7 @@ Tests fail. What matters is how fast you can find out **why**: is it a real bug,
 - common causes of flaky tests, and how to fix them
 - how CI runs Playwright, shown **read-only**: this book's repository doesn't run any CI
 
-The failure output below is real. It was produced with Playwright 1.65.0 by two deliberately broken tests against the practice project.
+The failure output below is real. It was produced with Playwright 1.65.1 by two deliberately broken tests against the practice project.
 
 ## 19.1 Reading a failure
 
@@ -280,7 +280,7 @@ Large suites can be split across several machines with `--shard`: `npx playwrigh
 
 ## Sources
 
-The failure messages, attachments, and console output were produced by running deliberately failing tests with Playwright Test 1.65.0. The GitHub Actions workflow is quoted from the Playwright docs and was **not** added to this repository.
+The failure messages, attachments, and console output were produced by running deliberately failing tests with Playwright Test 1.65.1. The GitHub Actions workflow is quoted from the Playwright docs and was **not** added to this repository.
 
 - Playwright, *Debugging tests* (UI mode, Inspector, `--debug`, `page.pause`): [playwright.dev/docs/debug](https://playwright.dev/docs/debug)
 - Playwright, *Trace viewer* (trace options, `show-trace`, trace.playwright.dev): [playwright.dev/docs/trace-viewer](https://playwright.dev/docs/trace-viewer)

@@ -12,7 +12,7 @@ Live site: https://js-qa-playwright-study.vercel.app/
 - **Part 4 — Debugging & CI** (19). CI is explained read-only; this repository runs no CI.
 - **Appendix (optional) — SQL for QA** (A–C), with runnable queries
 
-Every chapter lists its sources. Facts were checked against MDN, the TypeScript Handbook, the Node.js docs, playwright.dev, and SQLite's docs. Examples were run with Node.js v24.18.0, TypeScript 7.0.2, Playwright 1.65.0, and SQLite 3.54.1.
+Every chapter lists its sources. Facts were checked against MDN, the TypeScript Handbook, the Node.js docs, playwright.dev, and SQLite's docs. Examples were run with Node.js v24.18.0, TypeScript 7.0.2, Playwright 1.65.1, and SQLite 3.54.1.
 
 ## Run the book locally
 

@@ -144,7 +144,7 @@ false
 object
 ```
 
-In a Playwright test, a missing `await` before an **action** lets the next line run while the action is still happening, which is a classic cause of flaky tests. A missing `await` before an **assertion** means the test doesn't wait for it. When we checked with Playwright 1.65.0, an unawaited assertion that was still running when the test finished made the test fail with `Error: Test ended.`. That's better than a false pass, but the error points at the wrong cause.
+In a Playwright test, a missing `await` before an **action** lets the next line run while the action is still happening, which is a classic cause of flaky tests. A missing `await` before an **assertion** means the test doesn't wait for it. When we checked with Playwright 1.65.1, an unawaited assertion that was still running when the test finished made the test fail with `Error: Test ended.`. That's better than a false pass, but the error points at the wrong cause.
 
 Two safety nets, both recommended in Playwright's *Best Practices* guide:
 
@@ -490,7 +490,7 @@ console.log(saved);
 
 ## Sources
 
-Every example was run with Node.js v24.18.0, and the TypeScript messages were produced by TypeScript 7.0.2. The missing-`await` behaviour was checked with Playwright Test 1.65.0.
+Every example was run with Node.js v24.18.0, and the TypeScript messages were produced by TypeScript 7.0.2. The missing-`await` behaviour was checked with Playwright Test 1.65.1.
 
 - MDN, *Using promises*: [developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises)
 - MDN, *Promise* (states, `all`, `allSettled`, `race`, `any`): [developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)

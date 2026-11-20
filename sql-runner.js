@@ -9,7 +9,7 @@
  */
 "use strict";
 
-const SQLJS_VERSION = "1.16.0";
+const SQLJS_VERSION = "1.17.0";
 const SQLJS = `https://cdn.jsdelivr.net/npm/sql.js@${SQLJS_VERSION}/dist`;
 
 function cellText(v) {

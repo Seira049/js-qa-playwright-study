@@ -503,7 +503,7 @@ console.log(responses.map(isOrder));
 
 ## Sources
 
-The TypeScript messages were produced by TypeScript 7.0.2, and the runtime examples were run with Node.js v24.18.0. Playwright's `json()` return type was read from the type definitions in Playwright 1.65.0.
+The TypeScript messages were produced by TypeScript 7.0.2, and the runtime examples were run with Node.js v24.18.0. Playwright's `json()` return type was read from the type definitions in Playwright 1.65.1.
 
 - TypeScript Handbook, *Everyday Types* (unions, type aliases vs interfaces, literal types, type assertions, non-null assertion): [typescriptlang.org/docs/handbook/2/everyday-types.html](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html)
 - TypeScript Handbook, *Narrowing* (type guards, `in`, `instanceof`, discriminated unions, `never` and exhaustiveness): [typescriptlang.org/docs/handbook/2/narrowing.html](https://www.typescriptlang.org/docs/handbook/2/narrowing.html)

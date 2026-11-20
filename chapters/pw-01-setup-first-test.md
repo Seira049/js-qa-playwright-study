@@ -8,7 +8,7 @@ Part 1 taught the language. Part 2 puts it to work with **Playwright Test**, the
 - run tests in different ways, and read the HTML report
 - record a test with codegen
 
-> **Playwright runs on your computer, not in this page.** It needs Node.js and real browsers, so the examples in Part 2 can't run in the playground. Every example here is part of the practice project and was run with **Playwright 1.65.0** before publishing.
+> **Playwright runs on your computer, not in this page.** It needs Node.js and real browsers, so the examples in Part 2 can't run in the playground. Every example here is part of the practice project and was run with **Playwright 1.65.1** before publishing.
 
 ## 13.1 Installing Playwright in a new project
 
@@ -253,7 +253,7 @@ test("remember me starts unchecked", async ({ page }) => {
 
 ## Sources
 
-Every test and command shown was run with Playwright Test 1.65.0 and Node.js v24.18.0 against the practice project.
+Every test and command shown was run with Playwright Test 1.65.1 and Node.js v24.18.0 against the practice project.
 
 - Playwright, *Installation* (installer questions, created files, system requirements): [playwright.dev/docs/intro](https://playwright.dev/docs/intro)
 - Playwright, *Writing tests*: [playwright.dev/docs/writing-tests](https://playwright.dev/docs/writing-tests)

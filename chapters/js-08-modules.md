@@ -333,7 +333,7 @@ console.log(buildOrder(20), formatTotal(20));
 
 ## Sources
 
-The multi-file examples and error messages were produced by running them with Node.js v24.18.0. The Playwright import style was checked with Playwright Test 1.65.0.
+The multi-file examples and error messages were produced by running them with Node.js v24.18.0. The Playwright import style was checked with Playwright Test 1.65.1.
 
 - MDN, *JavaScript modules* guide: [developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules)
 - MDN, *export* and *import*: [developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export), [developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import)

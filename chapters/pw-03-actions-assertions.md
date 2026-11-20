@@ -10,7 +10,7 @@ Once you can find elements, you need to **do things** to them (click, type, choo
 - how browser dialogs (`confirm`, `alert`) are handled
 - why `waitForTimeout` is a trap
 
-All examples run against the practice project (`practice/tests/actions.spec.ts`), with Playwright 1.65.0.
+All examples run against the practice project (`practice/tests/actions.spec.ts`), with Playwright 1.65.1.
 
 ## 15.1 Actions
 
@@ -105,7 +105,7 @@ And on the page: `await expect(page).toHaveURL(…)` and `await expect(page).toH
 
 ### Always await them
 
-A web-first assertion returns a promise. Without `await`, the test doesn't wait for it. Chapter 10 showed that Playwright 1.65.0 fails such a test with `Error: Test ended.`, which points at the wrong cause. Use the `@typescript-eslint/no-floating-promises` lint rule to catch it.
+A web-first assertion returns a promise. Without `await`, the test doesn't wait for it. Chapter 10 showed that Playwright 1.65.1 fails such a test with `Error: Test ended.`, which points at the wrong cause. Use the `@typescript-eslint/no-floating-promises` lint rule to catch it.
 
 ### Negating with .not
 
@@ -295,7 +295,7 @@ In TypeScript, give the helper's parameter a type: `import { type Page } from "@
 
 ## Sources
 
-Every test shown, including the solutions, was run with Playwright Test 1.65.0 against the practice project.
+Every test shown, including the solutions, was run with Playwright Test 1.65.1 against the practice project.
 
 - Playwright, *Actions*: [playwright.dev/docs/input](https://playwright.dev/docs/input)
 - Playwright, *Auto-waiting* (actionability checks): [playwright.dev/docs/actionability](https://playwright.dev/docs/actionability)

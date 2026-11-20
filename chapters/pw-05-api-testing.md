@@ -9,7 +9,7 @@ Not every test needs a browser. Playwright can send HTTP requests directly, whic
 - sending a token in a header
 - negative tests, and keeping API tests safe to run in parallel
 
-All tests are in `practice/tests/api.spec.ts` and were run with Playwright 1.65.0.
+All tests are in `practice/tests/api.spec.ts` and were run with Playwright 1.65.1.
 
 ## 17.1 HTTP in two minutes
 
@@ -292,7 +292,7 @@ test("deleting an unknown user", async ({ request }) => {
 
 ## Sources
 
-Every test shown, including the solutions, was run with Playwright Test 1.65.0 against the practice API, and repeated three times in parallel (`--repeat-each=3`) to confirm the tests don't interfere with each other.
+Every test shown, including the solutions, was run with Playwright Test 1.65.1 against the practice API, and repeated three times in parallel (`--repeat-each=3`) to confirm the tests don't interfere with each other.
 
 - Playwright, *API testing* (the `request` fixture respects `baseURL` and `extraHTTPHeaders`): [playwright.dev/docs/api-testing](https://playwright.dev/docs/api-testing)
 - Playwright, *APIRequestContext* (`get`, `post`, `delete`, `params`, `data` serialisation): [playwright.dev/docs/api/class-apirequestcontext](https://playwright.dev/docs/api/class-apirequestcontext)

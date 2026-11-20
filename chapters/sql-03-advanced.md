@@ -294,7 +294,7 @@ test("parameters keep user input out of the SQL text", async () => {
 });
 ```
 
-Both tests pass with Playwright 1.65.0 on Node.js v24.18.0.
+Both tests pass with Playwright 1.65.1 on Node.js v24.18.0.
 
 ### Real databases
 
@@ -404,7 +404,7 @@ SELECT category, name, price FROM ranked WHERE rn = 1 ORDER BY category;
 
 ## Sources
 
-Every query and result was run with SQLite 3.54.1 (through sql.js 1.16.0). The Playwright database tests were run with Playwright Test 1.65.0 on Node.js v24.18.0.
+Every query and result was run with SQLite 3.54.1 (through sql.js 1.17.0). The Playwright database tests were run with Playwright Test 1.65.1 on Node.js v24.18.0.
 
 - SQLite, *WITH clause* (CTEs): [sqlite.org/lang_with.html](https://www.sqlite.org/lang_with.html)
 - SQLite, *Window functions*: [sqlite.org/windowfunctions.html](https://www.sqlite.org/windowfunctions.html)
