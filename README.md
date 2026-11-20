@@ -6,10 +6,10 @@ Live site: https://js-qa-playwright-study.vercel.app/
 
 ## Contents
 
-- **Part 1 — JavaScript & TypeScript** (Chapters 1–12): how code runs, values and types, operators, strings, arrays and objects, functions, control flow and errors, modules, classes, async code, TypeScript types and narrowing, generics/utility types/tsconfig
-- **Part 2 — Playwright** (13–16): setup, locators, actions and assertions, hooks/page objects/fixtures/sign-in
-- **Part 3 — API Testing & Test Data** (17–18)
-- **Part 4 — Debugging & CI** (19). CI is explained read-only; this repository runs no CI.
+- **Part 1 — JavaScript & TypeScript** (Chapters 1–16): how code runs, values and types, operators, strings, arrays and objects, functions, control flow and errors, modules, classes, async code, TypeScript types and narrowing, generics/utility types/tsconfig, dates and Map/Set, Node.js for testers (environment, files, URLs), JavaScript in the browser (DOM, `page.evaluate`, `fetch`), and TypeScript in real projects
+- **Part 2 — Playwright** (17–20): setup, locators, actions and assertions, hooks/page objects/fixtures/sign-in
+- **Part 3 — API Testing & Test Data** (21–22)
+- **Part 4 — Debugging & CI** (23). CI is explained read-only; this repository runs no CI.
 - **Appendix (optional) — SQL for QA** (A–C), with runnable queries
 
 Every chapter lists its sources. Facts were checked against MDN, the TypeScript Handbook, the Node.js docs, playwright.dev, and SQLite's docs. Examples were run with Node.js v24.18.0, TypeScript 7.0.2, Playwright 1.65.1, and SQLite 3.54.1.

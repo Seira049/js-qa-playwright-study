@@ -300,14 +300,14 @@ Both tests pass with Playwright 1.65.1 on Node.js v24.18.0.
 
 For PostgreSQL, MySQL, or SQL Server, install the driver your team uses (for example `pg` for PostgreSQL or `mysql2` for MySQL). The pattern is the same:
 
-- open a connection in a **fixture**, and close it in the teardown after `use()` (Chapter 16)
+- open a connection in a **fixture**, and close it in the teardown after `use()` (Chapter 20)
 - read the connection details from **environment variables**, never from code (`process.env.DB_URL`)
 - **always pass values as parameters**
 - connect with a database user that has only the permissions the tests need, and only to a **test** database
 
 ### Keeping database tests independent
 
-- Create the rows a test needs, with unique values, and delete them afterwards (the same rules as Chapter 17).
+- Create the rows a test needs, with unique values, and delete them afterwards (the same rules as Chapter 21).
 - Or run each test's changes inside a transaction and `ROLLBACK` at the end, if your application and driver allow it.
 - Don't assume exact row counts in shared environments. Check for the specific rows your test created.
 

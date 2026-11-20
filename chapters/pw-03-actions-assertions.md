@@ -12,7 +12,7 @@ Once you can find elements, you need to **do things** to them (click, type, choo
 
 All examples run against the practice project (`practice/tests/actions.spec.ts`), with Playwright 1.65.1.
 
-## 15.1 Actions
+## 19.1 Actions
 
 | Action | Does |
 |---|---|
@@ -45,13 +45,13 @@ test("check, select, type, press, and dialogs", async ({ page }) => {
   await page.getByRole("searchbox").fill("cable");
   await expect(page.getByRole("status")).toHaveText("1 product");
   await page.getByRole("searchbox").clear();
-  // ...the dialog part is in section 15.5
+  // ...the dialog part is in section 19.5
 });
 ```
 
 **`fill` or `pressSequentially`?** Use `fill`. The Playwright API docs say: *"In most cases, you should use `locator.fill()` instead. You only need to press keys one by one if there is special keyboard handling on the page"*, such as an autocomplete that reacts to each key.
 
-## 15.2 Auto-waiting: actionability checks
+## 19.2 Auto-waiting: actionability checks
 
 Before an action, Playwright waits until the element is ready for it. The docs call these **actionability checks**:
 
@@ -67,7 +67,7 @@ The practice login waits 300 ms before it navigates, to simulate a server. The t
 
 If an element never becomes actionable, the action eventually fails with an error explaining which check didn't pass. By default actions have **no timeout of their own**, so the limit is the **test timeout** (30 seconds by default). You can set `use: { actionTimeout: 10_000 }` in the config to give actions a shorter limit.
 
-## 15.3 Web-first assertions
+## 19.3 Web-first assertions
 
 `await expect(locator).toBe…()` assertions **retry**: they keep re-checking the page until the condition is true, or until the assertion timeout runs out (**5 seconds** by default).
 
@@ -116,7 +116,7 @@ await expect(page.getByRole("alert")).not.toBeVisible();
 
 `.not` retries too: it waits until the condition is **false**.
 
-## 15.4 Retrying vs non-retrying assertions
+## 19.4 Retrying vs non-retrying assertions
 
 `expect(value)` on an ordinary value (not a locator or page) checks **once**, immediately:
 
@@ -142,7 +142,7 @@ For a value that changes over time but isn't a locator, Playwright offers `expec
 
 Normally a failed assertion **stops** the test. `expect.soft(…)` records the failure and lets the test continue, so one run can report several problems (for example, every wrong field on a profile page). The test is still marked as failed at the end.
 
-## 15.5 Dialogs
+## 19.5 Dialogs
 
 `alert`, `confirm`, and `prompt` dialogs block the page. The Playwright docs say: *"By default, dialogs are auto-dismissed by Playwright."* For a `confirm`, dismissing means clicking **Cancel**.
 
@@ -164,7 +164,7 @@ await expect(page.getByTestId("cart-count")).toHaveText("0");
 
 `page.once` handles only the **next** dialog. `page.on("dialog", …)` handles every dialog until you remove it. The handler gets a `dialog` object with `message()`, `type()`, `accept()`, and `dismiss()`.
 
-## 15.6 Don't wait for time
+## 19.6 Don't wait for time
 
 `page.waitForTimeout(ms)` pauses for a fixed time. The API docs say it *"should only be used for debugging. Tests using the timer in production are going to be flaky."* A fixed wait is either too short on a slow day (the test fails) or too long every other day (the suite is slow). Wait for something meaningful instead:
 
@@ -172,7 +172,7 @@ await expect(page.getByTestId("cart-count")).toHaveText("0");
 |---|---|
 | `await page.waitForTimeout(2000)` before checking a message | `await expect(message).toBeVisible()` |
 | waiting after a click for the next page | `await expect(page).toHaveURL(/dashboard/)` |
-| waiting for data to load | `await expect(rows).toHaveCount(4)`, or `page.waitForResponse(…)` (Chapter 18) |
+| waiting for data to load | `await expect(rows).toHaveCount(4)`, or `page.waitForResponse(…)` (Chapter 22) |
 
 ## Try it
 

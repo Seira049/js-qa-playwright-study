@@ -11,7 +11,7 @@ A handful of tests can live in one file. A real suite needs structure: shared se
 
 All code here is in the practice project (`practice/pages/`, `practice/fixtures/`, `practice/tests/organize.spec.ts`, `practice/tests/auth.setup.ts`) and was run with Playwright 1.65.1.
 
-## 16.1 Groups and hooks
+## 20.1 Groups and hooks
 
 `test.describe` groups related tests. Its title is added to each test's name in reports. **Hooks** run code around the tests in their group:
 
@@ -36,7 +36,7 @@ test.beforeEach(async ({ page }) => {
 
 Be careful with `beforeAll`. It runs once per **worker**, and tests run in several workers in parallel, so "once" may really mean several times. It also can't use the `page` fixture, because each test gets its own page.
 
-## 16.2 Test isolation
+## 20.2 Test isolation
 
 The Playwright docs explain that each test runs in a fresh **browser context**, *"equivalent to incognito-like profiles"*, with its own cookies, local storage, and session storage. Nothing one test does (signing in, adding to the cart) leaks into the next. That's what lets tests run in parallel and in any order.
 
@@ -50,9 +50,9 @@ test.describe("isolation", () => {
 });
 ```
 
-The consequence: **a test must never depend on another test** having run first. If a test needs data or a signed-in user, it sets that up itself (or through a fixture, section 16.5).
+The consequence: **a test must never depend on another test** having run first. If a test needs data or a signed-in user, it sets that up itself (or through a fixture, section 20.5).
 
-## 16.3 Tags, steps, and skipping
+## 20.3 Tags, steps, and skipping
 
 ### Tags
 
@@ -69,7 +69,7 @@ npx playwright test --grep @smoke
 npx playwright test --grep-invert @slow   # everything except @slow
 ```
 
-In the practice project, `--grep @smoke` runs 3 tests: the two tagged tests, plus the `setup` project that the `chromium` project depends on (section 16.6).
+In the practice project, `--grep @smoke` runs 3 tests: the two tagged tests, plus the `setup` project that the `chromium` project depends on (section 20.6).
 
 ### Steps
 
@@ -91,7 +91,7 @@ test("adding a product updates the cart", async ({ dashboardPage }) => {
 - `test.fixme(...)` marks a test as broken, to fix later. It isn't run.
 - `test.fail()` says the test is *expected* to fail. If it passes, Playwright reports that, so you notice when a bug is fixed.
 
-## 16.4 Page Object Model
+## 20.4 Page Object Model
 
 A **page object** is a class that wraps one page (or one component). It holds that page's locators and offers methods for what a user does there. Tests then describe *what* happens, and the page object knows *how*. When a label or layout changes, you update one class instead of every test.
 
@@ -157,7 +157,7 @@ export class DashboardPage {
 }
 ```
 
-Everything here comes from Part 1: `export` (Chapter 8), classes with `readonly` typed fields and a constructor (Chapter 9), `import type` (Chapter 8), and `async` methods (Chapter 10). Because locators are lazy (Chapter 14), creating them in the constructor is safe.
+Everything here comes from Part 1: `export` (Chapter 8), classes with `readonly` typed fields and a constructor (Chapter 9), `import type` (Chapter 8), and `async` methods (Chapter 10). Because locators are lazy (Chapter 18), creating them in the constructor is safe.
 
 Good habits for page objects:
 
@@ -165,7 +165,7 @@ Good habits for page objects:
 - Name methods after **user intentions** (`signIn`, `addToCart`), not mechanics (`clickButton3`).
 - Don't build deep inheritance chains (Chapter 9). Small classes, plus objects for shared components, are easier to follow.
 
-## 16.5 Custom fixtures
+## 20.5 Custom fixtures
 
 You could write `const loginPage = new LoginPage(page); await loginPage.goto();` at the start of every test. **Fixtures** do it for you. `test.extend` creates a new `test` function with extra fixtures, which tests then destructure just like `page`:
 
@@ -199,7 +199,7 @@ How a fixture works:
 
 1. The code **before** `await use(value)` is **setup**.
 2. `use(value)` hands `value` to the test, and waits while the test runs.
-3. The code **after** `use` is **teardown**. It runs after the test, even if the test failed. That makes it the place to clean up (Chapter 18 deletes test data there).
+3. The code **after** `use` is **teardown**. It runs after the test, even if the test failed. That makes it the place to clean up (Chapter 22 deletes test data there).
 
 The generic `base.extend<PageObjects>` (Chapter 12) tells TypeScript the type of each fixture, so `loginPage` is fully typed in tests.
 
@@ -223,11 +223,11 @@ test.describe("login", () => {
 
 The docs list two reasons fixtures beat hooks: fixtures **encapsulate setup and teardown in the same place**, and they're **on-demand**: *"Playwright Test will setup only the ones needed by your test and nothing else."* A test that only asks for `loginPage` never opens the dashboard.
 
-(That's also why the isolation test in 16.2 lists `dashboardPage` even though it doesn't use the variable: asking for the fixture is what makes it open the dashboard.)
+(That's also why the isolation test in 20.2 lists `dashboardPage` even though it doesn't use the variable: asking for the fixture is what makes it open the dashboard.)
 
 Fixtures can also have `{ scope: "worker" }`, which creates them once per worker process instead of once per test. That's useful for expensive things like a test account shared by many tests.
 
-## 16.6 Sign in once: setup project and storageState
+## 20.6 Sign in once: setup project and storageState
 
 Signing in through the UI before every test is slow. The approach recommended in the Playwright *Authentication* docs:
 
@@ -249,7 +249,7 @@ setup("sign in", async ({ page }) => {
 });
 ```
 
-The config wires it up (from Chapter 13):
+The config wires it up (from Chapter 17):
 
 ```ts title="practice/playwright.config.ts (excerpt)"
 projects: [

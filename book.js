@@ -29,29 +29,33 @@ window.BOOK = {
         { id: "js-10", number: 10, title: "Asynchronous Code: Promises and async/await", file: "chapters/js-10-async-promises.md", minutes: 55 },
         { id: "js-11", number: 11, title: "TypeScript: Types, Interfaces, and Narrowing", file: "chapters/js-11-ts-types-narrowing.md", minutes: 55 },
         { id: "js-12", number: 12, title: "TypeScript: Generics, Utility Types, and tsconfig", file: "chapters/js-12-ts-generics-utility-tsconfig.md", minutes: 50 },
+        { id: "js-13", number: 13, title: "Dates, Times, Map, and Set", file: "chapters/js-13-dates-map-set.md", minutes: 45 },
+        { id: "js-14", number: 14, title: "Node.js for Testers: Environment, Files, and URLs", file: "chapters/js-14-node-for-testers.md", minutes: 40 },
+        { id: "js-15", number: 15, title: "JavaScript in the Browser: The DOM, page.evaluate, and fetch", file: "chapters/js-15-js-in-the-browser.md", minutes: 45 },
+        { id: "js-16", number: 16, title: "TypeScript in Real Projects", file: "chapters/js-16-ts-real-projects.md", minutes: 50 },
       ],
     },
     {
       title: "Playwright",
       intro: "Writing end-to-end tests with Playwright Test. These chapters run on your computer against the practice project in the practice/ folder.",
       chapters: [
-        { id: "pw-01", number: 13, title: "Setting Up Playwright and Your First Test", file: "chapters/pw-01-setup-first-test.md", minutes: 35 },
-        { id: "pw-02", number: 14, title: "Locators", file: "chapters/pw-02-locators.md", minutes: 40 },
-        { id: "pw-03", number: 15, title: "Actions and Assertions", file: "chapters/pw-03-actions-assertions.md", minutes: 45 },
-        { id: "pw-04", number: 16, title: "Organizing Tests: Hooks, Page Objects, Fixtures, and Sign-in", file: "chapters/pw-04-organizing-tests.md", minutes: 55 },
+        { id: "pw-01", number: 17, title: "Setting Up Playwright and Your First Test", file: "chapters/pw-01-setup-first-test.md", minutes: 35 },
+        { id: "pw-02", number: 18, title: "Locators", file: "chapters/pw-02-locators.md", minutes: 40 },
+        { id: "pw-03", number: 19, title: "Actions and Assertions", file: "chapters/pw-03-actions-assertions.md", minutes: 45 },
+        { id: "pw-04", number: 20, title: "Organizing Tests: Hooks, Page Objects, Fixtures, and Sign-in", file: "chapters/pw-04-organizing-tests.md", minutes: 55 },
       ],
     },
     {
       title: "API Testing & Test Data",
       chapters: [
-        { id: "pw-05", number: 17, title: "API Testing", file: "chapters/pw-05-api-testing.md", minutes: 45 },
-        { id: "pw-06", number: 18, title: "Mocking the Network and Managing Test Data", file: "chapters/pw-06-mocking-test-data.md", minutes: 50 },
+        { id: "pw-05", number: 21, title: "API Testing", file: "chapters/pw-05-api-testing.md", minutes: 45 },
+        { id: "pw-06", number: 22, title: "Mocking the Network and Managing Test Data", file: "chapters/pw-06-mocking-test-data.md", minutes: 50 },
       ],
     },
     {
       title: "Debugging & CI",
       chapters: [
-        { id: "pw-07", number: 19, title: "Debugging, Flaky Tests, and CI", file: "chapters/pw-07-debugging-ci.md", minutes: 40 },
+        { id: "pw-07", number: 23, title: "Debugging, Flaky Tests, and CI", file: "chapters/pw-07-debugging-ci.md", minutes: 40 },
       ],
     },
     {

@@ -10,7 +10,7 @@ Part 1 taught the language. Part 2 puts it to work with **Playwright Test**, the
 
 > **Playwright runs on your computer, not in this page.** It needs Node.js and real browsers, so the examples in Part 2 can't run in the playground. Every example here is part of the practice project and was run with **Playwright 1.65.1** before publishing.
 
-## 13.1 Installing Playwright in a new project
+## 17.1 Installing Playwright in a new project
 
 Make an empty folder, open a terminal in it, and run:
 
@@ -25,7 +25,7 @@ The installer asks a few questions. The Playwright docs list them as:
 - add a GitHub Actions workflow
 - install Playwright browsers (default: yes)
 
-> **About the GitHub Actions question:** answering yes adds a workflow file that runs your tests on GitHub every time you push. According to GitHub's billing docs, standard GitHub-hosted runners are **free in public repositories**. Private repositories get a monthly included amount, and if no payment method is on file, usage is blocked when it runs out rather than billed. If you don't want CI yet, answer **no**. You can add it later (Chapter 19).
+> **About the GitHub Actions question:** answering yes adds a workflow file that runs your tests on GitHub every time you push. According to GitHub's billing docs, standard GitHub-hosted runners are **free in public repositories**. Private repositories get a monthly included amount, and if no payment method is on file, usage is blocked when it runs out rather than billed. If you don't want CI yet, answer **no**. You can add it later (Chapter 23).
 
 It creates:
 
@@ -39,7 +39,7 @@ tests/
 
 Playwright supports Node.js **22.x, 24.x, or 26.x** (from the system requirements in the Playwright docs). Check yours with `node --version`.
 
-## 13.2 This book's practice project
+## 17.2 This book's practice project
 
 The book's repository includes a small practice website and a ready-made Playwright project, so you can run every example in Part 2 against the same pages.
 
@@ -54,12 +54,12 @@ npx playwright test
 The last command starts the practice server automatically (see `webServer` below) and runs the tests. The practice site has:
 
 - `/practice/login.html`: a sign-in form. The valid login is `qa@test.io` / `correct-password`.
-- `/practice/dashboard.html`: a product list with search, sorting, an "in stock" filter, a cart counter, and a confirmation dialog. The products come from `/practice/api/products.json`, which Chapter 18 mocks.
-- `/api/...`: a small users API for Chapter 17.
+- `/practice/dashboard.html`: a product list with search, sorting, an "in stock" filter, a cart counter, and a confirmation dialog. The products come from `/practice/api/products.json`, which Chapter 22 mocks.
+- `/api/...`: a small users API for Chapter 21.
 
 You can also browse the site yourself: run `npm run serve` in the `practice` folder and open http://localhost:3000/practice/login.html.
 
-## 13.3 The configuration file
+## 17.3 The configuration file
 
 Here is the practice project's `playwright.config.ts`:
 
@@ -100,13 +100,13 @@ export default defineConfig({
 | `retries` | retry failed tests, here only on CI (`process.env.CI` is set by most CI systems) |
 | `reporter` | how results are shown. `html` writes a report you can open in a browser. |
 | `use.baseURL` | the start of every URL, so tests can write `page.goto("/practice/login.html")` |
-| `use.trace` | record a trace (a step-by-step recording) when a test is retried. Chapter 19 covers it. |
-| `projects` | named setups, usually one per browser. The `setup` project is used in Chapter 16. |
+| `use.trace` | record a trace (a step-by-step recording) when a test is retried. Chapter 23 covers it. |
+| `projects` | named setups, usually one per browser. The `setup` project is used in Chapter 20. |
 | `webServer` | start the app before the tests, and wait until `url` responds |
 
 `!!process.env.CI` uses the `!!` from Chapter 3 to turn the environment variable into `true` or `false`.
 
-## 13.4 Your first test, line by line
+## 17.4 Your first test, line by line
 
 ```ts title="practice/tests/first.spec.ts"
 import { test, expect } from "@playwright/test";
@@ -125,12 +125,12 @@ test("login page has a heading", async ({ page }) => {
 | `({ page })` | Playwright passes an object of **fixtures**, and the test destructures `page` (Chapter 5). Each test gets a fresh page in its own isolated browser context. |
 | `await page.goto(…)` | navigate, and wait for the page to load. The path is added to `baseURL`. |
 | `await expect(page).toHaveTitle(/Sign in/)` | assert the title matches a regular expression (Chapter 4) |
-| `page.getByRole("heading", { name: "Sign in" })` | a **locator**: a way to find an element (Chapter 14) |
+| `page.getByRole("heading", { name: "Sign in" })` | a **locator**: a way to find an element (Chapter 18) |
 | `.toBeVisible()` | a **web-first assertion**: it keeps checking until the element is visible, or the assertion times out (5 seconds by default) |
 
 Test files end in `.spec.ts` (or `.test.ts`). Playwright finds them inside `testDir`.
 
-## 13.5 Running tests
+## 17.5 Running tests
 
 | Command | What it does |
 |---|---|
@@ -159,7 +159,7 @@ Tests run in parallel in several *worker* processes. The default number of worke
 
 While you work on one test, `test.only(...)` runs only that test, and `test.skip(...)` skips one. Remove `test.only` before you commit: with `forbidOnly` on, CI will fail the run if one is left in.
 
-## 13.6 Recording a test with codegen
+## 17.6 Recording a test with codegen
 
 Codegen opens a browser and writes test code as you click around:
 

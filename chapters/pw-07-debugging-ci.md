@@ -12,7 +12,7 @@ Tests fail. What matters is how fast you can find out **why**: is it a real bug,
 
 The failure output below is real. It was produced with Playwright 1.65.1 by two deliberately broken tests against the practice project.
 
-## 19.1 Reading a failure
+## 23.1 Reading a failure
 
 ### A locator that finds nothing
 
@@ -54,7 +54,7 @@ Call log:
 
 **Expected** and **Received** show the difference. The call log shows Playwright checked **14 times** over 5 seconds, and the element was there each time with the wrong text. So the locator is fine, and either the test's expectation or the application is wrong. This is where you decide whether you've found a bug.
 
-## 19.2 Seeing what happened
+## 23.2 Seeing what happened
 
 | Tool | Command | Best for |
 |---|---|---|
@@ -68,7 +68,7 @@ The Playwright CLI docs describe `--debug` as a shortcut for running *"with Play
 
 Remove `page.pause()` before committing. It stops the run and waits, which would hang a CI job.
 
-## 19.3 Traces
+## 23.3 Traces
 
 A **trace** records everything about a test: each action, a DOM snapshot before and after it, screenshots, network requests, console messages, and the source line. It's the most useful artefact for a failure you can't reproduce on your own machine.
 
@@ -92,7 +92,7 @@ Usage:
 
 You can also open a trace by dragging the `.zip` onto [trace.playwright.dev](https://trace.playwright.dev). Traces can contain everything the page showed and sent, including personal data and tokens, so share them with the same care as the application's data.
 
-## 19.4 Screenshots, video, and the browser console
+## 23.4 Screenshots, video, and the browser console
 
 ```ts
 // In playwright.config.ts → use, or with test.use(...) in one file:
@@ -122,18 +122,18 @@ In the run above, a `console.warn("hello from the page")` inside the page appear
 [browser warning] hello from the page
 ```
 
-## 19.5 Flaky tests
+## 23.5 Flaky tests
 
 A **flaky** test sometimes passes and sometimes fails with no change to the code. Common causes, and their fixes:
 
 | Cause | Fix |
 |---|---|
-| Fixed waits (`waitForTimeout`) | wait for a real signal: an assertion, a URL, a response (Chapter 15) |
+| Fixed waits (`waitForTimeout`) | wait for a real signal: an assertion, a URL, a response (Chapter 19) |
 | Reading a value, then checking it once | use a retrying assertion: `await expect(locator).toHaveText(...)` |
 | A missing `await` | lint with `@typescript-eslint/no-floating-promises` (Chapter 10) |
-| Tests that share data or depend on order | create unique data per test, and clean up in fixtures (Chapters 17–18) |
-| Locators that match several elements, or depend on position | make the locator unique (Chapter 14) |
-| An unstable backend | mock the parts that aren't under test (Chapter 18) |
+| Tests that share data or depend on order | create unique data per test, and clean up in fixtures (Chapters 21–22) |
+| Locators that match several elements, or depend on position | make the locator unique (Chapter 18) |
+| An unstable backend | mock the parts that aren't under test (Chapter 22) |
 
 Two commands help you find flakiness before your colleagues do:
 
@@ -144,13 +144,13 @@ npx playwright test --retries=2                                # see which tests
 
 Playwright reports a test that failed and then passed on retry as **flaky**. Treat that as a bug to investigate, not a pass. Retries hide problems if nobody looks at them.
 
-## 19.6 Running in CI
+## 23.6 Running in CI
 
 **CI** (continuous integration) runs your tests automatically, for example on every push or pull request. Playwright's docs include setup guides for many CI systems.
 
 > **This book's repository has no CI and runs nothing on GitHub.** Nothing in this chapter is added to the repository. The workflow below is shown for reading only, so you know what `npm init playwright` creates if you answer "yes" to the GitHub Actions question.
 
-If you do add CI later: GitHub's billing docs say standard GitHub-hosted runners are free in **public** repositories. **Private** repositories use a monthly included amount, and when it runs out, usage is blocked unless you've added a payment method (Chapter 13).
+If you do add CI later: GitHub's billing docs say standard GitHub-hosted runners are free in **public** repositories. **Private** repositories use a monthly included amount, and when it runs out, usage is blocked unless you've added a payment method (Chapter 17).
 
 ### The workflow from the Playwright docs (read-only)
 
@@ -190,7 +190,7 @@ Step by step:
 3. **checkout** and **setup-node**: get the code, and install the latest LTS version of Node.js.
 4. **`npm ci`**: install exactly the versions in `package-lock.json`.
 5. **`npx playwright install --with-deps`**: download the browsers and the system libraries they need.
-6. **`npx playwright test`**: run the tests. Most CI systems set the `CI` environment variable, which turns on `forbidOnly` and `retries` in the config (Chapter 13).
+6. **`npx playwright test`**: run the tests. Most CI systems set the `CI` environment variable, which turns on `forbidOnly` and `retries` in the config (Chapter 17).
 7. **upload-artifact**: save the HTML report, with its traces and screenshots, for 30 days, so you can download it and open it with `npx playwright show-report`. `if: ${{ !cancelled() }}` makes it run even when tests failed, which is exactly when you need the report.
 
 ### A type check in CI
@@ -216,7 +216,7 @@ Large suites can be split across several machines with `--shard`: `npx playwrigh
 <summary>Show hints</summary>
 
 - `--trace on` overrides the config's trace setting for that run. The trace file's path is printed with the failure.
-- In UI mode, use the "Pick locator" button, then click the dropdown in the snapshot. Compare its suggestion with the options in Chapter 14.
+- In UI mode, use the "Pick locator" button, then click the dropdown in the snapshot. Compare its suggestion with the options in Chapter 18.
 - The practice suite is designed to pass with `--repeat-each`, because every test that creates data uses unique values and cleans up.
 
 </details>

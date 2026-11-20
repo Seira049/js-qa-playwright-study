@@ -1,12 +1,12 @@
 import { test, expect } from "@playwright/test";
 
-// Chapter 13, Try it #3
+// Chapter 17, Try it #3
 test("remember me starts unchecked", async ({ page }) => {
   await page.goto("/practice/login.html");
   await expect(page.getByLabel("Remember me")).not.toBeChecked();
 });
 
-// Chapter 14, Try it #1 and #2
+// Chapter 18, Try it #1 and #2
 test("dashboard locators", async ({ page }) => {
   await page.goto("/practice/dashboard.html");
   await expect(page.getByLabel("Sort by")).toBeVisible();
@@ -15,7 +15,7 @@ test("dashboard locators", async ({ page }) => {
   await expect(cable.getByText("$9.50")).toBeVisible();
 });
 
-// Chapter 14: name matching is case-insensitive substring unless exact
+// Chapter 18: name matching is case-insensitive substring unless exact
 test("role name matching", async ({ page }) => {
   await page.goto("/practice/login.html");
   await expect(page.getByRole("button", { name: "sign" })).toBeVisible();

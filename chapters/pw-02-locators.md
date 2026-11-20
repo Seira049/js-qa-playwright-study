@@ -10,7 +10,7 @@ A **locator** describes how to find an element on the page. Good locators are th
 
 All examples run against the practice project (`practice/tests/locators.spec.ts`), with Playwright 1.65.1.
 
-## 14.1 The built-in locators
+## 18.1 The built-in locators
 
 The Playwright docs list these as *"the recommended built-in locators"*:
 
@@ -36,7 +36,7 @@ test("built-in locators", async ({ page }) => {
 });
 ```
 
-(The file's `beforeEach` signs in first. Hooks are covered in Chapter 16.)
+(The file's `beforeEach` signs in first. Hooks are covered in Chapter 20.)
 
 ### getByRole: the first choice
 
@@ -79,7 +79,7 @@ The docs recommend text locators *"to find non interactive elements like `div`, 
 
 You can still use `page.locator("css or xpath")`. But the Playwright docs say: *"CSS and XPath are not recommended as the DOM can often change leading to non resilient tests."* A class like `.btn-primary-v2` can change in any redesign, while "the Sign in button" usually doesn't. Use `page.locator(...)` as a last resort, and prefer simple, stable selectors when you do.
 
-## 14.2 Locators are lazy and strict
+## 18.2 Locators are lazy and strict
 
 **Lazy:** creating a locator doesn't touch the page. It's a *description* of how to find the element. Playwright looks for the element each time you **use** the locator (to click, fill, or assert). That's why you can create locators in a page object's constructor (Chapter 9), before the page has even loaded.
 
@@ -98,7 +98,7 @@ The error lists the matches and suggests a locator for each one. (Three, not fou
 
 You *can* pick one with `.first()`, `.last()`, or `.nth(index)`, but the docs call these **"not recommended"**, because *"when your page changes, Playwright may click on an element you did not intend."* Make the locator more specific instead.
 
-## 14.3 Filtering and chaining
+## 18.3 Filtering and chaining
 
 ### filter: narrow a list
 
@@ -124,7 +124,7 @@ There are also `hasNotText` and `hasNot` for the opposite.
 
 Calling a locator method **on another locator** searches only inside it: `webcam.getByRole("button", …)` finds the button **in the Webcam row**. This "find the row, then the thing in the row" pattern is how you handle tables, lists, and cards.
 
-## 14.4 Reading many elements
+## 18.4 Reading many elements
 
 To check the text of every matching element at once, use `allTextContents()` (or `allInnerTexts()`), which returns an array of strings:
 
@@ -147,7 +147,7 @@ test("allTextContents and sorting", async ({ page }) => {
 This test uses half of Part 1: `map` and arrow functions (Chapters 5–6), `replace` and `Number` (Chapters 2 and 4), and the numeric sort compare function (Chapter 5). It also shows the difference between two kinds of assertion:
 
 - `expect(numbers).toEqual(...)` checks a value you've already read. It checks **once**.
-- `await expect(locator).toHaveText([...])` checks the page and **retries** until it matches (Chapter 15). When you can, prefer this kind.
+- `await expect(locator).toHaveText([...])` checks the page and **retries** until it matches (Chapter 19). When you can, prefer this kind.
 
 `.price` is a CSS class locator. It's fine here because there's no user-facing alternative for a price, but it's the kind of locator to keep to a minimum.
 

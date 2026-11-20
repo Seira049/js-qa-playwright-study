@@ -11,7 +11,7 @@ Not every test needs a browser. Playwright can send HTTP requests directly, whic
 
 All tests are in `practice/tests/api.spec.ts` and were run with Playwright 1.65.1.
 
-## 17.1 HTTP in two minutes
+## 21.1 HTTP in two minutes
 
 An HTTP **request** has a **method**, a **URL**, optional **headers**, and for some methods a **body**. The **response** has a **status code**, headers, and usually a body.
 
@@ -46,7 +46,7 @@ Codes in the 200s mean success, the 400s mean a problem with the request, and th
 | `POST /api/users` with `{ name, email, role? }` | `201` with the new user, `400` if invalid, `409` if the email exists. Needs the token. |
 | `DELETE /api/users/:id` | `204`, or `404`. Needs the token. |
 
-## 17.2 The request fixture
+## 21.2 The request fixture
 
 Tests can ask for a `request` fixture, just like `page`. It sends HTTP requests without opening a browser, and the Playwright docs say it *"respects configuration options like `baseURL` or `extraHTTPHeaders`"*. So relative paths work:
 
@@ -78,7 +78,7 @@ test("GET /api/users returns the user list", async ({ request }) => {
 What's happening:
 
 - `request.get(url)` returns a response. `request.post`, `put`, `patch`, `delete`, and `head` work the same way.
-- `response.status()`, `response.ok()`, and `response.headers()` are read **once**. These are non-retrying `expect(value)` checks (Chapter 15), which is right for data you already have.
+- `response.status()`, `response.ok()`, and `response.headers()` are read **once**. These are non-retrying `expect(value)` checks (Chapter 19), which is right for data you already have.
 - `await response.json()` parses the body (Chapter 5). Its type is `any` (Chapter 11), so the assertions are what actually check the data.
 - `expect.objectContaining({...})` matches an object that has **at least** these properties.
 - `expect.any(Number)` matches any number, and `expect.stringMatching(regex)` matches a string by pattern. Inside `toEqual`, they let you check the **shape** of each user without knowing exact values.
@@ -99,7 +99,7 @@ test("query parameters filter by role", async ({ request }) => {
 
 This uses `every` from Chapter 5 to check the whole list at once.
 
-## 17.3 Sending data and tokens
+## 21.3 Sending data and tokens
 
 `data` is the request body. The API docs say that if it's an object, *"it will be serialized to json string and `content-type` header will be set to `application/json` if not explicitly set."*
 
@@ -141,7 +141,7 @@ test("create, read, and delete a user", async ({ request }) => {
 - `await expect(response).toBeOK()` asserts the status is in the 200–299 range. If it fails, Playwright includes the response details in the error message, which helps more than a bare `expected 200, got 500`.
 - **Headers** are passed per request with `headers`. To send a header on every request, set `extraHTTPHeaders` in the config's `use`. Keep real tokens in environment variables (`process.env.API_TOKEN`), never in code.
 
-## 17.4 Negative tests
+## 21.4 Negative tests
 
 Most API bugs hide in the error paths. Test that bad requests are rejected **with the right status and message**:
 
@@ -182,10 +182,10 @@ The second argument to `expect(value, message)` is a **custom message**, shown w
 
 Ideas for negative cases: missing required fields, wrong types (`"age": "ten"`), empty strings and whitespace (like `"  "` above), values that are too long, duplicates, unknown IDs, a missing or expired token, and a valid token for a user who isn't allowed to do the action.
 
-## 17.5 Keeping API tests reliable
+## 21.5 Keeping API tests reliable
 
-- **Make data unique.** Tests run in parallel (Chapter 13), and against a shared environment other people's tests run too. Fixed values like `chen@test.io` collide. Add something unique, such as `Date.now()` or `crypto.randomUUID()`.
-- **Clean up what you create**, ideally in a fixture's teardown so it runs even when the test fails (Chapter 18).
+- **Make data unique.** Tests run in parallel (Chapter 17), and against a shared environment other people's tests run too. Fixed values like `chen@test.io` collide. Add something unique, such as `Date.now()` or `crypto.randomUUID()`.
+- **Clean up what you create**, ideally in a fixture's teardown so it runs even when the test fails (Chapter 22).
 - **Don't depend on order.** Each test should create what it needs. A test that only passes after another test has created a user breaks when it runs alone or in parallel.
 - **Check what matters.** Exact counts like `total === 2` break as soon as someone else adds data. Relationships like `total === users.length`, and the presence of the record you created, are more robust.
 

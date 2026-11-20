@@ -1,7 +1,7 @@
 # Practice project for the Playwright chapters
 
 A small practice website (sign-in page, product dashboard, users API) and a
-Playwright Test project with every example from Chapters 13–19 and Appendix C.
+Playwright Test project with every example from Chapters 17–23, the `page.evaluate` examples from Chapter 15, and Appendix C.
 
 ```bash
 cd practice
@@ -14,6 +14,6 @@ npm run serve                # browse the site at http://localhost:3000/practice
 ```
 
 - Valid login: `qa@test.io` / `correct-password`
-- `tests/solutions/` holds the solutions to the chapters' "Try it" tasks.
+- `tests/solutions/` holds the solutions to the chapters' "Try it" tasks, named by chapter number (e.g. `ch19.spec.ts`).
 - The API keeps data in memory; restarting the server resets it.
 - Requires Node.js 22 or later. No CI is configured, and nothing runs on GitHub.

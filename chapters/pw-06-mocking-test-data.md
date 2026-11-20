@@ -12,17 +12,17 @@ Real backends are slow, change, and rarely fail on demand. To test how a page ha
 
 The dashboard in the practice project loads its products with `fetch("api/products.json")`. All tests are in `practice/tests/mocking.spec.ts` and `practice/tests/test-data.spec.ts`, run with Playwright 1.65.1.
 
-## 18.1 Mock or not?
+## 22.1 Mock or not?
 
 | Mock when you want to… | Don't mock when you want to… |
 |---|---|
 | test UI states that are hard to trigger: empty, error, loading | prove the frontend and backend work **together** |
-| make a test independent of an unstable or shared backend | test the API itself (Chapter 17) |
+| make a test independent of an unstable or shared backend | test the API itself (Chapter 21) |
 | test edge cases, such as very long names or 1,000 items | catch a backend change that breaks the UI |
 
 A balanced suite has a few end-to-end tests against the real backend, and more focused tests that mock the network for specific UI behaviour. A mocked test only proves the UI works **with the data you gave it**, so keep your mock data close to what the real API returns.
 
-## 18.2 Intercepting a request: page.route
+## 22.2 Intercepting a request: page.route
 
 `page.route(urlPattern, handler)` intercepts every matching request. The handler decides what happens. **Register the route before the page makes the request**, so usually before `page.goto`:
 
@@ -53,7 +53,7 @@ test("empty state", async ({ page }) => {
 });
 ```
 
-## 18.3 Simulating failures
+## 22.3 Simulating failures
 
 A **server error**: `fulfill` with an error status:
 
@@ -100,7 +100,7 @@ test("loading state", async ({ page }) => {
 
 `route.continue()` sends the request on to the real server unchanged. `let release!: () => void;` uses `!` to tell TypeScript the variable will be assigned before use (it's set inside the promise's constructor, which runs immediately).
 
-## 18.4 Changing a real response
+## 22.4 Changing a real response
 
 `route.fetch()` performs the real request and gives you the response. You can change it, then `fulfill` with your version:
 
@@ -119,7 +119,7 @@ test("modify the real response", async ({ page }) => {
 
 Passing `response` keeps the real status and headers, and `json` replaces the body. This keeps the test close to real data while still forcing the case you want.
 
-## 18.5 Checking what the page sent
+## 22.5 Checking what the page sent
 
 Sometimes the thing to test is the **request**: did clicking "Save" send the right data? `page.waitForResponse` (and `page.waitForRequest`) returns a promise for the next matching response. **Start waiting before** the action that triggers it, then `await` it after:
 
@@ -137,7 +137,7 @@ test("wait for the request the page sends", async ({ page }) => {
 
 If you call `waitForResponse` **after** the action, the response may already have arrived, and the wait would hang until it times out. For a form, `response.request().postDataJSON()` gives you the body the page sent.
 
-## 18.6 Recording and replaying with HAR
+## 22.6 Recording and replaying with HAR
 
 A **HAR** file (HTTP Archive) is a recording of network traffic. `page.routeFromHAR` can **record** real responses into a file, and later **replay** them, so tests get realistic data without the real backend.
 
@@ -157,9 +157,9 @@ await page.goto("/practice/dashboard.html");
 
 When we recorded the practice dashboard, Playwright wrote `products.har` plus a separate `.json` file for the response body. Commit HAR files only when they contain no secrets or personal data. Recordings of real systems often contain both, so check before you share them.
 
-## 18.7 Test data through the API
+## 22.7 Test data through the API
 
-For tests against a real backend, the most reliable data is data the test **creates itself**, through the API, which is much faster than the UI. Put it in a fixture (Chapter 16), so the cleanup always runs:
+For tests against a real backend, the most reliable data is data the test **creates itself**, through the API, which is much faster than the UI. Put it in a fixture (Chapter 20), so the cleanup always runs:
 
 ```ts title="practice/fixtures/data.ts"
 import { test as base, expect, type APIRequestContext } from "@playwright/test";

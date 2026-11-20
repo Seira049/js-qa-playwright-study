@@ -123,7 +123,7 @@
           <li><b>Read, then run.</b> JavaScript, TypeScript, and SQL examples marked <span class="pill">▶ Run</span> run in your browser. Change them in the playground and run them again.</li>
           <li><b>Practise.</b> Each chapter ends with an exercise that checks your answer, and a short quiz.</li>
           <li><b>Checked against the docs.</b> Chapters marked <span class="pill ok">✓ Reviewed</span> were checked against MDN, the TypeScript Handbook, the Node.js docs, and playwright.dev, and every example was run. Each one lists its sources at the end.</li>
-          <li><b>Playwright on your computer.</b> Part 2 onwards uses real browsers, so those examples run on your machine against the practice project in the <code>practice/</code> folder. Chapter 13 shows how to set it up.</li>
+          <li><b>Playwright on your computer.</b> Part 2 onwards uses real browsers, so those examples run on your machine against the practice project in the <code>practice/</code> folder. Chapter 17 shows how to set it up.</li>
         </ul>
       </section>
 
