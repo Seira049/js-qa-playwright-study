@@ -57,7 +57,8 @@ assistant. Read it before making a change.
               part in another browser. Browsers differ: e.g. Safari's engine
               rejects new Date("2026-02-30") and formats dates differently,
               so run all three after changing date, Intl, or fetch examples;
-            npm run check -- --links checks that every source link works)
+            npm run check -- --links checks that every source link works;
+            npm run check -- --base=https://js-qa-playwright-study.vercel.app tests the live site)
 
   It also checks cross-references: every "Chapter N" and "section N.M" in the
   text must exist, and practice titles must be unique within a chapter.

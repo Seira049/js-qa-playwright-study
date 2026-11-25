@@ -23,6 +23,7 @@ const WORK = path.join(import.meta.dirname, ".work", `run-${process.pid}`); // o
 const TSC = path.join(import.meta.dirname, "node_modules", ".bin", "tsc");
 const NO_BROWSER = process.argv.includes("--no-browser");
 const LINKS = process.argv.includes("--links");
+const BASE = process.argv.find((a) => a.startsWith("--base="))?.slice(7); // test a deployed site instead of the local files
 const BROWSER = process.argv.find((a) => a.startsWith("--browser="))?.slice(10) || "chromium"; // chromium | firefox | webkit
 const ONLY = process.argv.find((a) => a.startsWith("--only="))?.slice(7);
 
@@ -181,8 +182,8 @@ if (!NO_BROWSER) {
       res.writeHead(200, { "content-type": TYPES[path.extname(file)] || "application/octet-stream" }).end(data);
     });
   });
-  await new Promise((r) => server.listen(0, "127.0.0.1", r));
-  const base = `http://127.0.0.1:${server.address().port}`;
+  if (!BASE) await new Promise((r) => server.listen(0, "127.0.0.1", r));
+  const base = BASE ? BASE.replace(/\/$/, "") : `http://127.0.0.1:${server.address().port}`;
   const browser = await engine.launch();
   console.log(`\nBrowser (${BROWSER})`);
   for (const ch of chapters) {
@@ -192,7 +193,7 @@ if (!NO_BROWSER) {
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
     // Browsers log failed requests (like an example's deliberate 404) as console errors. Those are expected.
-    page.on("console", (m) => { if (m.type() === "error" && !/Failed to load resource/.test(m.text())) errors.push(m.text()); });
+    page.on("console", (m) => { if (m.type() === "error" && !/Failed to load resource|Fetch API cannot load/.test(m.text())) errors.push(m.text()); });
     await page.goto(`${base}/#/c/${ch.id}/all`);
     await page.locator(".chapter-body h2").first().waitFor();
     let ok = 0, bad = 0;
@@ -229,7 +230,7 @@ if (!NO_BROWSER) {
     await page.close();
   }
   await browser.close();
-  server.close();
+  if (!BASE) server.close();
 }
 
 console.log(failures ? `\n${failures} problem(s) found.` : "\nAll checks passed.");
