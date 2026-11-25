@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
+// PORT lets you use another port if 3000 is busy:  PORT=3100 npx playwright test
+const PORT = process.env.PORT ?? "3000";
+
 export default defineConfig({
   testDir: "./tests",
   fullyParallel: true,
@@ -7,7 +10,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: "html",
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL: `http://localhost:${PORT}`,
     trace: "on-first-retry",
   },
   projects: [
@@ -20,7 +23,7 @@ export default defineConfig({
   ],
   webServer: {
     command: "node server.mjs",
-    url: "http://localhost:3000/practice/login.html",
-    reuseExistingServer: !process.env.CI,
+    url: `http://localhost:${PORT}/practice/login.html`,
+    reuseExistingServer: !process.env.CI && !process.env.BUG,
   },
 });

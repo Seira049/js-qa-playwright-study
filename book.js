@@ -6,6 +6,7 @@
  *   { id, number, title, planned: true }  listed in the contents, not written yet
  *   { legacy: "<module id>" }             an older module from curriculum.js, not yet reviewed
  * Optional `label` replaces the default "Chapter <number>" (e.g. "Appendix A").
+ * `checkpoint: true` marks a checkpoint project: shown with 🏁, not counted as a chapter.
  *
  * A part with `optional: true` is shown as optional and is not counted in overall progress.
  */
@@ -25,6 +26,7 @@ window.BOOK = {
         { id: "js-06", number: 6, title: "Functions", file: "chapters/js-06-functions.md", minutes: 50 },
         { id: "js-07", number: 7, title: "Control Flow and Errors", file: "chapters/js-07-control-flow-errors.md", minutes: 50 },
         { id: "js-08", number: 8, title: "Modules: import and export", file: "chapters/js-08-modules.md", minutes: 40 },
+        { id: "checkpoint-1", checkpoint: true, label: "Checkpoint 1", title: "Project: A Test-Run Report Module", file: "chapters/checkpoint-1.md", minutes: 60 },
         { id: "js-09", number: 9, title: "Classes", file: "chapters/js-09-classes.md", minutes: 50 },
         { id: "js-10", number: 10, title: "Asynchronous Code: Promises and async/await", file: "chapters/js-10-async-promises.md", minutes: 55 },
         { id: "js-11", number: 11, title: "TypeScript: Types, Interfaces, and Narrowing", file: "chapters/js-11-ts-types-narrowing.md", minutes: 55 },
@@ -33,6 +35,7 @@ window.BOOK = {
         { id: "js-14", number: 14, title: "Node.js for Testers: Environment, Files, and URLs", file: "chapters/js-14-node-for-testers.md", minutes: 40 },
         { id: "js-15", number: 15, title: "JavaScript in the Browser: The DOM, page.evaluate, and fetch", file: "chapters/js-15-js-in-the-browser.md", minutes: 45 },
         { id: "js-16", number: 16, title: "TypeScript in Real Projects", file: "chapters/js-16-ts-real-projects.md", minutes: 50 },
+        { id: "checkpoint-2", checkpoint: true, label: "Checkpoint 2", title: "Project: A Typed Order Loader", file: "chapters/checkpoint-2.md", minutes: 75 },
       ],
     },
     {
@@ -56,6 +59,7 @@ window.BOOK = {
       title: "Debugging & CI",
       chapters: [
         { id: "pw-07", number: 23, title: "Debugging, Flaky Tests, and CI", file: "chapters/pw-07-debugging-ci.md", minutes: 40 },
+        { id: "checkpoint-3", checkpoint: true, label: "Checkpoint 3", title: "Project: A Smoke Suite That Catches Real Bugs", file: "chapters/checkpoint-3.md", minutes: 90 },
       ],
     },
     {

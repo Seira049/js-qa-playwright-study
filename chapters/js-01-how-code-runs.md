@@ -38,6 +38,26 @@ The TypeScript Handbook puts it this way: *"Type annotations never change the ru
 
 > **Why this matters for QA:** Playwright tests are written in JavaScript or TypeScript. When you create a project with `npm init playwright@latest`, the installer asks which one you want, and TypeScript is the default. Everything you learn about JavaScript applies to both, because TypeScript *is* JavaScript plus types.
 
+```practice ts title="Add your first type annotation"
+// Add a type annotation that says testsFailed is a number.
+// Keep the value 2. Then print it.
+const testsFailed = 2;
+```
+
+```hint
+A type annotation goes **after the name**, before the `=`: `const name: type = value;`. Print it with `console.log(testsFailed);`.
+```
+
+```checks
+__book.test("testsFailed is annotated as number", () => /const\s+testsFailed\s*:\s*number\s*=\s*2\b/.test(__book.source));
+__book.test("prints 2", () => __book.logs.includes("2"));
+```
+
+```solution
+const testsFailed: number = 2;
+console.log(testsFailed);
+```
+
 ## 1.2 Two places your code can run
 
 JavaScript needs a program to run it. You'll meet two of them.
@@ -132,6 +152,27 @@ Retrying in 2 seconds
 
 In Node.js, `console.log` writes to *standard output* (stdout), while `console.error` and `console.warn` write to *standard error* (stderr). They look the same in a terminal, but tools such as CI systems can capture and display them separately. In the playground, errors appear in red and warnings in yellow.
 
+```practice js title="Print a run header"
+// 1. Print the label "Browser:" and the text "chromium" as TWO values in one console.log.
+//    Output: Browser: chromium
+// 2. Print this object: { passed: 3, failed: 1 }
+```
+
+```hint
+Separate values with a comma: `console.log("Browser:", "chromium");`. An object goes straight in: `console.log({ passed: 3, failed: 1 });`.
+```
+
+```checks
+__book.test('line 1 is "Browser: chromium"', () => __book.logs[0] === "Browser: chromium");
+__book.test("line 1 passes two separate values", () => __book.calls[0]?.length === 2);
+__book.test("line 2 prints the object", () => __book.logs[1] === "{ passed: 3, failed: 1 }");
+```
+
+```solution
+console.log("Browser:", "chromium");
+console.log({ passed: 3, failed: 1 });
+```
+
 ## 1.4 How JavaScript reads your code
 
 **Top to bottom, one statement at a time.** Each instruction is called a *statement*. This book ends every statement with a semicolon (`;`). JavaScript can often add missing semicolons for you (a feature called *automatic semicolon insertion*), but MDN calls writing them yourself best practice, because it avoids some surprising bugs. Playwright's documentation examples use semicolons too.
@@ -154,6 +195,28 @@ Step 3: click Sign in
 ```
 
 **JavaScript is case-sensitive.** `console`, `Console`, and `CONSOLE` are three different names. Only `console` (all lowercase) is the built-in one.
+
+```practice js title="Make every step print"
+// This should print three lines: step 1, step 2, step 3.
+// Two things stop it. Fix them without deleting any step.
+console.log("step 1");
+// console.log("step 2");
+Console.log("step 3");
+```
+
+```hint
+A line that starts with `//` is a comment, so JavaScript skips it. And JavaScript is case-sensitive: the built-in object is `console`, all lowercase.
+```
+
+```checks
+__book.test("prints step 1, step 2, step 3 in order", () => JSON.stringify(__book.logs) === '["step 1","step 2","step 3"]');
+```
+
+```solution
+console.log("step 1");
+console.log("step 2");   // removed the // so the line runs
+console.log("step 3");   // console, not Console
+```
 
 ## 1.5 Reading error messages
 
@@ -215,6 +278,31 @@ result.click();
 ```
 
 In Node.js and Chrome this prints `TypeError: Cannot read properties of undefined (reading 'click')`. Firefox and Safari word the message differently, but the error type is the same.
+
+```practice js title="Read the error, then fix it"
+// Run this first and read the error message: what type of error is it,
+// and on which line? Then fix line 3 so the program prints 3, then done.
+const title = undefined;
+console.log("checking title");
+console.log(title.length);
+console.log("done");
+```
+
+```hint
+The error is a `TypeError`: you can't read `.length` of `undefined`. Give `title` a real string with 3 characters, such as `"Pay"`.
+```
+
+```checks
+__book.test("no error is thrown", () => __book.errors.length === 0);
+__book.test("prints checking title, 3, done", () => JSON.stringify(__book.logs) === '["checking title","3","done"]');
+```
+
+```solution
+const title = "Pay";   // any 3-character string works
+console.log("checking title");
+console.log(title.length);
+console.log("done");
+```
 
 ## 1.6 Running code on your computer
 

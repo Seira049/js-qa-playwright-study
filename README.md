@@ -4,6 +4,15 @@ An interactive book for QA engineers: learn **JavaScript and TypeScript** proper
 
 Live site: https://js-qa-playwright-study.vercel.app/
 
+PDF for reading on the go: [JS-and-TS-for-QA.pdf](JS-and-TS-for-QA.pdf) (examples show their output; solutions and quiz answers are in an answer key after each chapter).
+
+## How the book works
+
+- **One topic per page.** Each chapter is split into short topics with Back / Next. "📜 Whole chapter on one page" shows it all at once. The side menu lists every chapter's topics (expand/collapse), and can be hidden with « or Ctrl + \\.
+- **🎯 Practices after topics**, plus exercises at the end of each chapter. They're checked automatically, have a 💡 hint, and earn ⚡ XP. XP moves you up eight ranks, from New Learner to QA Hero.
+- **🏁 Three checkpoint projects:** a test-run report module (after Chapter 8), a typed order loader (after Chapter 16), and a Playwright smoke suite that must catch five deliberately broken copies of the practice shop (after Chapter 23, run with `npm run checkpoint` in `practice/`).
+- Progress, answers, and XP are saved in your browser only.
+
 ## Contents
 
 - **Part 1 — JavaScript & TypeScript** (Chapters 1–16): how code runs, values and types, operators, strings, arrays and objects, functions, control flow and errors, modules, classes, async code, TypeScript types and narrowing, generics/utility types/tsconfig, dates and Map/Set, Node.js for testers (environment, files, URLs), JavaScript in the browser (DOM, `page.evaluate`, `fetch`), and TypeScript in real projects
@@ -26,6 +35,14 @@ Or `node practice/server.mjs`, which also serves the practice site and API at ht
 
 See [practice/README.md](practice/README.md).
 
+## Maintaining
+
+See [MAINTAINING.txt](MAINTAINING.txt). Before every commit, run the checks:
+
+```bash
+cd tools && npm install && npm run check
+```
+
 ## Writing chapters
 
 Chapters are Markdown files in `chapters/`, listed in `book.js`. Special code fences:
@@ -34,7 +51,9 @@ Chapters are Markdown files in `chapters/`, listed in `book.js`. Special code fe
 |---|---|
 | ` ```ts run ` / ` ```js run ` / ` ```sql run ` | Runnable example |
 | ` ```output ` | Expected output, shown under the previous example |
-| ` ```exercise ts title="…" ` | Exercise starter code (`js`, `ts`, or `sql`) |
+| ` ```practice ts title="…" ` | A short practice after a topic (10 XP by default; `xp=N` changes it) |
+| ` ```exercise ts title="…" ` | Exercise starter code (`js`, `ts`, or `sql`; 20 XP by default) |
+| ` ```hint ` | Optional hint for the practice/exercise above |
 | ` ```checks ` | JS/TS: hidden checks using `__book.test(label, fn)`, `__book.logs`, `__book.calls`, `__book.source`. SQL: the expected result table. |
 | ` ```solution ` | Optional solution |
 | ` ```quiz ` | JSON array of `{ q, code?, options, answer, why }` |
@@ -52,7 +71,9 @@ The SQL sample database is `chapters/sql/shop.sql`.
 ├── playground.js     # Monaco editor, TypeScript checking, running JS/TS/SQL
 ├── runner.js         # Web Worker that runs JS and formats console output like Node.js
 ├── sql-runner.js     # Web Worker that runs SQL with sql.js
-├── practice/         # practice website + Playwright project
+├── practice/         # practice website + Playwright project (npm run checkpoint)
+├── tools/            # maintainer tools: npm run check, npm run pdf
+├── JS-and-TS-for-QA.pdf
 └── vercel.json
 ```
 

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>JavaScript &amp; TypeScript for QA — Interactive Book</title>
   <meta name="description" content="An interactive book for QA engineers: learn JavaScript and TypeScript, then apply them with Playwright. Every example runs in your browser." />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
   <!-- Markdown parser for chapters (pinned version + integrity hash). Must load before the editor's AMD loader. -->
   <script src="https://cdn.jsdelivr.net/npm/marked@18.2.1/lib/marked.umd.js"
@@ -12,10 +13,12 @@
           crossorigin="anonymous"></script>
 </head>
 <body>
+  <a class="skip-link" href="#app">Skip to the lesson</a>
   <header class="site-header">
     <div class="header-inner">
       <button class="toc-toggle" id="toc-toggle" aria-label="Show contents">☰</button>
-      <a class="brand" href="#/"><span class="brand-mark">▸</span> JS &amp; TS for QA</a>
+      <button class="menu-btn" id="menu-btn" aria-controls="toc" aria-expanded="true" title="Show or hide the menu (Ctrl + \)">☰ Menu</button>
+      <a class="brand" href="#/"><img class="brand-logo" src="icon.svg" alt="" width="24" height="24" /> JS &amp; TS for QA</a>
       <nav class="site-nav">
         <button class="reset-btn" id="reset-progress" title="Clear saved progress">Reset progress</button>
       </nav>
@@ -29,7 +32,7 @@
 
   <div class="layout">
     <aside class="toc" id="toc" aria-label="Contents"></aside>
-    <main id="app" class="content"></main>
+    <main id="app" class="content" tabindex="-1"></main>
   </div>
 
   <button class="pg-toggle" id="pg-toggle" title="Playground (Ctrl + `)">&lt;/&gt; Playground</button>

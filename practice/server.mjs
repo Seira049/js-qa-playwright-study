@@ -7,7 +7,7 @@
 // Requires Node.js 22 or later. No dependencies.
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
-import { extname, join, normalize, resolve, sep } from "node:path";
+import path, { extname, join, normalize, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
@@ -18,6 +18,22 @@ const TYPES = {
   ".css": "text/css; charset=utf-8", ".json": "application/json; charset=utf-8", ".md": "text/markdown; charset=utf-8",
   ".svg": "image/svg+xml", ".png": "image/png",
 };
+
+// Checkpoint 3: BUG=<name> serves a deliberately broken copy of the shop,
+// so the checkpoint can test whether a learner's suite catches it.
+const BUGS = {
+  "valid-login-rejected": ["login.html", 'email === "qa@test.io" && password === "correct-password"', "false"],
+  "no-error-message": ["login.html", 'error.textContent = "Invalid email or password";', 'error.textContent = "";'],
+  "cart-stuck": ["dashboard.html", "cartCount++;", "cartCount = 1;"],
+  "search-ignored": ["dashboard.html", "p.name.toLowerCase().includes(q)", "true"],
+  "price-sort-reversed": ["dashboard.html", 'sort === "price-asc" ? a.price - b.price', 'sort === "price-asc" ? b.price - a.price'],
+};
+const BUG = process.env.BUG;
+if (BUG && !BUGS[BUG]) {
+  console.error(`Unknown BUG "${BUG}". Known: ${Object.keys(BUGS).join(", ")}`);
+  process.exit(1);
+}
+export { BUGS };
 
 let nextId = 3;
 let users = [];
@@ -97,7 +113,13 @@ async function serveFile(res, pathname) {
   if (file !== ROOT && !file.startsWith(ROOT + sep)) return send(res, 403, "Forbidden");
   if (pathname.endsWith("/")) file = join(file, "index.html");
   try {
-    const data = await readFile(file);
+    let data = await readFile(file);
+    if (BUG && file.endsWith(path.join("practice", BUGS[BUG][0]))) {
+      const [, from, to] = BUGS[BUG];
+      const text = data.toString("utf8");
+      if (!text.includes(from)) throw new Error(`BUG ${BUG}: pattern not found`);
+      data = Buffer.from(text.replace(from, to));
+    }
     res.writeHead(200, { "content-type": TYPES[extname(file)] ?? "application/octet-stream" });
     res.end(data);
   } catch {
@@ -115,6 +137,7 @@ createServer(async (req, res) => {
     send(res, 500, { error: "Internal error" });
   }
 }).listen(PORT, "127.0.0.1", () => {
+  if (BUG) console.log(`(serving the broken version: ${BUG})`);
   console.log(`Book and practice site: http://localhost:${PORT}/`);
   console.log(`Practice pages:          http://localhost:${PORT}/practice/login.html`);
 });

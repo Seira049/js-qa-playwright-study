@@ -95,6 +95,31 @@ undefined
 
 With `let`, the same mistake gives you a clear error. Use `const` and `let` in new code.
 
+```practice js title="A counter that changes"
+// 1. Create a const named browser with the text "firefox".
+// 2. Create a let named retries that starts at 0.
+// 3. Add 1 to retries twice (two separate lines).
+// 4. Print browser and retries in one console.log.  Output: firefox 2
+```
+
+```hint
+`const` for the value that never changes, `let` for the counter. `retries = retries + 1;` adds one.
+```
+
+```checks
+__book.test("browser is a const", () => /\bconst\s+browser\b/.test(__book.source));
+__book.test("retries is a let", () => /\blet\s+retries\b/.test(__book.source));
+__book.test('prints "firefox 2"', () => __book.logs.at(-1) === "firefox 2");
+```
+
+```solution
+const browser = "firefox";
+let retries = 0;
+retries = retries + 1;
+retries = retries + 1;
+console.log(browser, retries);
+```
+
 ## 2.2 Naming variables
 
 **Rules (enforced by JavaScript):**
@@ -109,6 +134,33 @@ With `let`, the same mistake gives you a clear error. Use `const` and `let` in n
 - Use *camelCase*: start lowercase and capitalise each following word, as in `loginButton`, `maxRetries`, or `isLoggedIn`.
 - Choose names that say what the value is. `expectedTitle` is easier to follow in a failing test than `t` or `data2`.
 - Start true/false values with `is`, `has`, or `should`, as in `isVisible` or `hasError`.
+
+```practice js title="Give these variables good names"
+// Rename x and y to camelCase names that say what they hold:
+//   x holds the user's email  ->  userEmail
+//   y says whether they're signed in  ->  isSignedIn
+// Update the console.log line too.
+let x = "qa@test.io";
+let y = true;
+console.log(x, y);
+```
+
+```hint
+Change the name in **every** place it's used, including inside `console.log(...)`.
+```
+
+```checks
+__book.test("userEmail holds the email", () => userEmail === "qa@test.io");
+__book.test("isSignedIn is true", () => isSignedIn === true);
+__book.test("x and y are gone", () => !/\blet\s+[xy]\b/.test(__book.source));
+__book.test('prints "qa@test.io true"', () => __book.logs.at(-1) === "qa@test.io true");
+```
+
+```solution
+let userEmail = "qa@test.io";
+let isSignedIn = true;
+console.log(userEmail, isSignedIn);
+```
 
 ## 2.3 The types of values
 
@@ -149,6 +201,31 @@ Two results are surprising:
 - **`typeof [1, 2]` is `"object"`.** Arrays are objects. To check for an array, use `Array.isArray(value)`, which returns `true` or `false`.
 
 `typeof` is especially useful in API tests, to confirm a field has the type you expect (for example, that `id` is a number and not the string `"1"`).
+
+```practice js title="Check the types in a response"
+const response = { id: "42", tags: ["smoke"], owner: null };
+
+// 1. Print typeof response.id        (the API sent a string by mistake)
+// 2. Print whether response.tags is an array  (use Array.isArray)
+// 3. Print whether response.owner is null      (compare with ===)
+```
+
+```hint
+`typeof` gives `"object"` for arrays **and** for `null`, so use `Array.isArray(...)` and `=== null` for those two.
+```
+
+```checks
+__book.test('line 1 is "string"', () => __book.logs[0] === "string");
+__book.test("line 2 is true, using Array.isArray", () => __book.logs[1] === "true" && /Array\.isArray\(/.test(__book.source));
+__book.test("line 3 is true, using === null", () => __book.logs[2] === "true" && /===\s*null/.test(__book.source));
+```
+
+```solution
+const response = { id: "42", tags: ["smoke"], owner: null };
+console.log(typeof response.id);
+console.log(Array.isArray(response.tags));
+console.log(response.owner === null);
+```
 
 ## 2.4 Numbers
 
@@ -228,6 +305,30 @@ false
 true
 ```
 
+```practice js title="Compare a total safely"
+// The cart shows a total of 0.3. The code adds 0.1 and 0.2.
+const total = 0.1 + 0.2;
+
+// Make matches true by rounding total to 2 decimal places before comparing.
+const matches = total === 0.3;
+console.log(matches);
+```
+
+```hint
+`Math.round(total * 100) / 100` rounds to 2 decimal places.
+```
+
+```checks
+__book.test("matches is true", () => matches === true);
+__book.test("total is rounded with Math.round", () => /Math\.round\(/.test(__book.source));
+```
+
+```solution
+const total = 0.1 + 0.2;
+const matches = Math.round(total * 100) / 100 === 0.3;
+console.log(matches);
+```
+
 ## 2.5 Converting text into numbers
 
 Text you read from a web page is **always a string**, even when it looks like a number. In Playwright, for example, `locator.textContent()` gives you a string (or `null`), so `"3"` from a cart badge isn't the number `3`. To do maths or compare numbers, convert first.
@@ -255,6 +356,30 @@ Going the other way, `String(404)` turns a number into the string `"404"`.
 
 > **Testing tip:** after converting, check the result isn't `NaN` before you rely on it. Otherwise a broken page can produce `NaN`, and any comparison with `NaN` is `false`. That can make an assertion fail for a confusing reason.
 
+```practice js title="Read a count from the page"
+// A badge on the page shows this text:
+const badgeText = "12 items";
+
+// count should be the NUMBER 12. Number(badgeText) gives NaN, so use parseInt.
+const count = Number(badgeText);
+console.log(count, typeof count);
+```
+
+```hint
+`parseInt(text, 10)` reads the whole number at the start and stops at the first space. Always pass the `10`.
+```
+
+```checks
+__book.test("count is the number 12", () => count === 12);
+__book.test("uses parseInt with base 10", () => /parseInt\(\s*badgeText\s*,\s*10\s*\)/.test(__book.source));
+```
+
+```solution
+const badgeText = "12 items";
+const count = parseInt(badgeText, 10);
+console.log(count, typeof count);
+```
+
 ## 2.6 Strings and booleans
 
 **Strings** are text in quotes. You can use double quotes `"…"`, single quotes `'…'`, or backticks `` `…` ``. All three make the same kind of value. This book uses double quotes. Backticks have extra powers, which Chapter 4 covers along with the other string skills you need for tests.
@@ -272,6 +397,29 @@ true boolean
 ```
 
 `===` means "is equal to". Chapter 3 covers comparisons and the related idea of *truthy* and *falsy* values.
+
+```practice js title="Was it created?"
+const statusCode = 201;
+
+// isCreated: true when statusCode is exactly 201. Use ===.
+const isCreated = false;
+console.log(isCreated);
+```
+
+```hint
+A comparison already gives `true` or `false`: `const isCreated = statusCode === 201;`.
+```
+
+```checks
+__book.test("isCreated is true", () => isCreated === true);
+__book.test("isCreated comes from a === comparison", () => /isCreated\s*=\s*statusCode\s*===\s*201/.test(__book.source));
+```
+
+```solution
+const statusCode = 201;
+const isCreated = statusCode === 201;
+console.log(isCreated);
+```
 
 ## 2.7 undefined and null
 
@@ -310,6 +458,26 @@ console.log(JSON.stringify(payload));
 
 So in an API response, `"phone": null` (the field exists but is empty) is different from a missing `email` field. That difference can be a real bug, for example when a contract says a field must always be present. Your assertions should check for the one you expect.
 
+```practice js title="What does the API really send?"
+// Build a payload object with these three properties:
+//   id: 7, nickname: undefined, avatar: null
+// Then print JSON.stringify(payload). Before you run it, predict the output.
+```
+
+```hint
+JSON has `null` but no `undefined`, so `nickname` disappears from the JSON text.
+```
+
+```checks
+__book.test("payload has the three properties", () => typeof payload === "object" && payload.id === 7 && "nickname" in payload && payload.avatar === null);
+__book.test('prints {"id":7,"avatar":null}', () => __book.logs.at(-1) === '{"id":7,"avatar":null}');
+```
+
+```solution
+const payload = { id: 7, nickname: undefined, avatar: null };
+console.log(JSON.stringify(payload));
+```
+
 ## 2.8 const doesn't freeze objects
 
 `const` stops you assigning a **new value** to the variable. It doesn't stop you changing the **contents** of an object or array the variable points to:
@@ -329,6 +497,34 @@ console.log(tags, config);
 ```
 
 What `const` forbids is `tags = ["other"]` or `config = {}`. Chapter 5 explains objects and arrays in detail.
+
+```practice js title="Change what's inside a const"
+const tags = ["smoke"];
+const settings = { retries: 0 };
+
+// Without changing the two const lines above:
+// 1. add "regression" to tags
+// 2. set settings.retries to 2
+// 3. print tags and settings in one console.log
+```
+
+```hint
+`tags.push("regression")` changes the array's contents, and `settings.retries = 2` changes a property. Both are allowed with `const`.
+```
+
+```checks
+__book.test('tags is ["smoke", "regression"]', () => JSON.stringify(tags) === '["smoke","regression"]');
+__book.test("settings.retries is 2", () => settings.retries === 2);
+__book.test("prints both", () => __book.logs.at(-1) === "[ 'smoke', 'regression' ] { retries: 2 }");
+```
+
+```solution
+const tags = ["smoke"];
+const settings = { retries: 0 };
+tags.push("regression");
+settings.retries = 2;
+console.log(tags, settings);
+```
 
 ## 2.9 Types in TypeScript
 
@@ -381,6 +577,27 @@ console.log(lastError, lastWarning);
 ### Avoid any
 
 TypeScript has a type called `any` that switches off checking for a value. The Handbook explains: *"Using any disables all further type checking."* It's sometimes tempting when a type is hard to write, but it removes the safety you're using TypeScript for. You'll learn better options, such as `unknown`, in Chapter 11.
+
+```practice ts title="Allow null on purpose"
+// TypeScript reports a problem on this line. Change only the TYPE so that
+// lastError can hold a string OR null. Keep the value null.
+let lastError: string = null;
+console.log(lastError);
+```
+
+```hint
+A union type lists the allowed types with `|`: `string | null`.
+```
+
+```checks
+__book.test("lastError is null", () => lastError === null);
+__book.test("the type is string | null", () => /lastError\s*:\s*(string\s*\|\s*null|null\s*\|\s*string)\s*=/.test(__book.source));
+```
+
+```solution
+let lastError: string | null = null;
+console.log(lastError);
+```
 
 ## Exercises
 

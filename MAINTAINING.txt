@@ -1,0 +1,87 @@
+MAINTAINING THE BOOK
+====================
+
+This file is for whoever changes the book: the owner, a helper, or an AI
+assistant. Read it before making a change.
+
+------------------------------------------------------------------------------
+1. RULES
+------------------------------------------------------------------------------
+
+  1. ACCURACY FIRST. Check every fact against the official docs (MDN, the
+     TypeScript Handbook, nodejs.org/api, playwright.dev, sqlite.org) and run
+     every example. Each chapter lists its sources at the end: keep them up to
+     date.
+  2. PLAIN LANGUAGE. The book is for testers who may be new to code. Explain
+     every new word, use short sentences, and give an example.
+  3. NO SECRETS. Never commit .env files, tokens, real passwords, or
+     playwright/.auth files. The practice shop's login (qa@test.io /
+     correct-password) is fake and public on purpose.
+  4. NO CI. The repository runs nothing on GitHub. Chapter 23 explains CI for
+     reading only. Don't add .github/workflows.
+  5. RUN THE CHECKS BEFORE EVERY COMMIT (section 3). Don't commit if they fail.
+  6. DON'T FORCE-PUSH unless the owner asks.
+
+------------------------------------------------------------------------------
+2. WHERE THINGS ARE
+------------------------------------------------------------------------------
+
+  book.js                     Table of contents: parts, chapters, checkpoints.
+  chapters/*.md               The chapters. Each "## " heading is one topic page.
+  chapters/checkpoint-*.md    The three checkpoint projects.
+  chapters/sql/shop.sql       Sample database for the SQL appendix.
+  app.js                      The book's page: topics, sidebar, practices, XP.
+  playground.js, runner.js,   The code editor and the JS/TS/SQL runners.
+    sql-runner.js
+  index.html, styles.css,     Page shell, styles, logo.
+    icon.svg
+  practice/                   Practice shop + Playwright project for Part 2+.
+    server.mjs                  Serves the shop and API. BUG=<name> serves a
+                                broken copy (used by checkpoint 3).
+    checkpoint.mjs              npm run checkpoint
+    tests/solutions/            Solutions to the "Try it" tasks.
+  tools/check.mjs             npm run check (see below).
+  tools/build-pdf.mjs         npm run pdf -> JS-and-TS-for-QA.pdf
+  tools/add-practices.py      Inserts practices into a chapter (see 4).
+  JS-and-TS-for-QA.pdf        The PDF. Rebuild it after changing chapters.
+
+------------------------------------------------------------------------------
+3. CHECKING A CHANGE
+------------------------------------------------------------------------------
+
+  Once:    cd tools && npm install
+  Always:  cd tools && npm run check
+           (npm run check:quick skips the browser part;
+            npm run check -- --only=js-05 checks one chapter)
+
+  It checks that every example prints its documented output in Node.js,
+  every TypeScript solution type-checks, every SQL example matches, and, in
+  Chromium, that every starter FAILS its checks and every solution PASSES.
+
+  For Playwright changes:  cd practice && npm test && npm run typecheck
+  For checkpoint 3:        cd practice && npm run checkpoint -- tests/solutions/checkpoint-3.spec.ts
+  If port 3000 is busy:    PORT=3100 npx playwright test
+
+  Then rebuild the PDF:    cd tools && npm run pdf
+
+------------------------------------------------------------------------------
+4. WRITING CONVENTIONS
+------------------------------------------------------------------------------
+
+  - Number teaching topics "## 5.3 Title". Prose like "Chapter 5" and
+    "section 5.3" becomes a link automatically.
+  - Runnable examples: ```js run / ```ts run / ```sql run, followed by an
+    ```output block with the exact output.
+  - A practice goes at the end of its topic:
+        ```practice ts title="Short task name"      (10 XP; xp=N to change)
+        starter code with the task in comments
+        ```
+        ```hint        one or two sentences
+        ```checks      __book.test("label", () => condition);
+        ```solution    one working answer
+    __book.logs (printed lines), __book.calls (console.log arguments) and
+    __book.source (the learner's code) are available in checks.
+    For SQL, ```checks holds the exact expected result table.
+  - A good practice: one idea, a clear expected result, a starter that FAILS,
+    checks that accept any correct answer and explain what's wrong.
+  - Avoid top-level names browsers already use (name, status, top, parent).

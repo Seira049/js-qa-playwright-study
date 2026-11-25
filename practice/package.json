@@ -6,7 +6,8 @@
   "scripts": {
     "serve": "node server.mjs",
     "test": "playwright test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "checkpoint": "node checkpoint.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.1",

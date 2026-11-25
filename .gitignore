@@ -14,3 +14,5 @@ practice/playwright-report/
 practice/playwright/.auth/
 practice/blob-report/
 practice/node_modules
+tools/node_modules/
+tools/.work/

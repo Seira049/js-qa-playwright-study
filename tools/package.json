@@ -1,0 +1,17 @@
+{
+  "name": "js-qa-book-tools",
+  "private": true,
+  "description": "Maintainer tools for the book: npm run check, npm run pdf.",
+  "type": "module",
+  "scripts": {
+    "check": "node check.mjs",
+    "check:quick": "node check.mjs --no-browser",
+    "pdf": "node build-pdf.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "marked": "18.2.1",
+    "sql.js": "1.17.0",
+    "typescript": "7.0.2"
+  }
+}
