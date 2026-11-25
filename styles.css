@@ -356,7 +356,8 @@ body.pg-open .playground { display: flex; }
 .brand-logo { display: block; }
 .menu-btn { background: transparent; color: var(--muted); border: 1px solid var(--border); padding: 0.3rem 0.7rem; border-radius: 999px; cursor: pointer; font: inherit; font-size: 0.85rem; }
 .menu-btn:hover { color: var(--text); border-color: var(--muted); }
-body.menu-hidden .toc { display: none; }
+/* "Hide the menu" is a desktop feature; on phones the menu is an overlay opened with ☰. */
+@media (min-width: 861px) { body.menu-hidden .toc { display: none; } }
 .toc-top { display: flex; align-items: center; gap: 0.4rem; }
 .toc-top .toc-home { flex: 1; margin-bottom: 0; }
 .toc-hide { background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 0.15rem 0.5rem; cursor: pointer; font-size: 1rem; }

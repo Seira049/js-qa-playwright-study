@@ -293,7 +293,11 @@
       updateUi((u) => { u.tocOpen[id] = !(u.tocOpen[id] ?? id === current.id); });
       renderToc();
     }));
-    toc.querySelector("#toc-hide").addEventListener("click", () => setMenuHidden(true));
+    toc.querySelector("#toc-hide").addEventListener("click", () => {
+      // On phones the menu is an overlay: « just closes it. On larger screens it hides the side menu.
+      if (window.matchMedia("(max-width: 860px)").matches) document.body.classList.remove("toc-open");
+      else setMenuHidden(true);
+    });
     const here = toc.querySelector(".toc-topics li.current");
     if (here) here.scrollIntoView({ block: "nearest" });
   }

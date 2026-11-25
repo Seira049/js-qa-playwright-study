@@ -191,18 +191,18 @@ const missing = await fetch("practice/api/nope.json");
 console.log(missing.ok, missing.status);   // no exception!
 
 try {
-  await fetch("http://localhost:1/unreachable");
+  await fetch("http://localhost:59999/unreachable");   // nothing is listening there
 } catch (err) {
-  console.log(`${err.name}: ${err.message}`);
+  console.log(err.name);
 }
 ```
 
 ```output
 false 404
-TypeError: Failed to fetch
+TypeError
 ```
 
-So always check `response.ok` (true for 200–299) before using the body. Forgetting to do that is a common bug in the code you'll be testing: an app that shows a blank page instead of an error message after a 500. That's exactly what the mocking tests in Chapter 22 look for. The network-error message differs between browsers, and Node.js says `fetch failed`, so check `err.name`, not the message.
+So always check `response.ok` (true for 200–299) before using the body. Forgetting to do that is a common bug in the code you'll be testing: an app that shows a blank page instead of an error message after a 500. That's exactly what the mocking tests in Chapter 22 look for. The error's **name** is `TypeError` everywhere, but its **message** is not. For the same unreachable address we saw `Failed to fetch` in Chromium, `NetworkError when attempting to fetch resource.` in Firefox, `Load failed` in Playwright's WebKit, and `fetch failed` in Node.js. So check `err.name`, not the message.
 
 ### Sending data
 

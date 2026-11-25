@@ -29,7 +29,7 @@ A relational database stores data in **tables**. Each **row** is one record, and
 | `orders` | an order | `id`, `customer_id`, `status`, `ordered_at` |
 | `order_items` | one product line in an order | `order_id`, `product_id`, `quantity`, `unit_price` |
 
-`id` is each table's **primary key**: a value that identifies exactly one row. `orders.customer_id` is a **foreign key**: it holds a `customers.id`, which links an order to its customer. Chapter B joins tables through these links.
+`id` is each table's **primary key**: a value that identifies exactly one row. `orders.customer_id` is a **foreign key**: it holds a `customers.id`, which links an order to its customer. Appendix B joins tables through these links.
 
 ## A.3 SELECT: reading data
 

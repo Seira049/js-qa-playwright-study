@@ -19,13 +19,15 @@ import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(import.meta.dirname, "..");
-const WORK = path.join(import.meta.dirname, ".work");
+const WORK = path.join(import.meta.dirname, ".work", `run-${process.pid}`); // one folder per run, so runs can go in parallel
 const TSC = path.join(import.meta.dirname, "node_modules", ".bin", "tsc");
 const NO_BROWSER = process.argv.includes("--no-browser");
+const LINKS = process.argv.includes("--links");
+const BROWSER = process.argv.find((a) => a.startsWith("--browser="))?.slice(10) || "chromium"; // chromium | firefox | webkit
 const ONLY = process.argv.find((a) => a.startsWith("--only="))?.slice(7);
 
-fs.rmSync(WORK, { recursive: true, force: true });
 fs.mkdirSync(WORK, { recursive: true });
+process.on("exit", () => fs.rmSync(WORK, { recursive: true, force: true }));
 fs.writeFileSync(path.join(WORK, "package.json"), '{"type":"module"}');
 
 let failures = 0;
@@ -48,6 +50,12 @@ const { runStatements } = require(path.join(WORK, "sql-runner.cjs"));
 const schema = fs.readFileSync(path.join(ROOT, "chapters/sql/shop.sql"), "utf8");
 const runSql = (sql) => { const db = new SQL.Database(); db.exec(schema); try { return runStatements(db, sql).map((r) => r.text).join("\n\n"); } catch (e) { return "ERROR: " + e.message; } finally { db.close(); } };
 
+// Every chapter, for cross-reference checks (even when --only is used)
+const allChapters = win.BOOK.parts.flatMap((p) => p.chapters).filter((c) => c.file);
+const byNumber = Object.fromEntries(allChapters.filter((c) => typeof c.number === "number").map((c) => [c.number, c]));
+const proseOf = (md) => md.replace(/```[\s\S]*?```/g, "").replace(/`[^`\n]*`/g, "");
+const topicNumbers = (c) => new Set([...fs.readFileSync(path.join(ROOT, c.file), "utf8").matchAll(/^## (\d+\.\d+) /gm)].map((m) => m[1]));
+
 let fileNo = 0;
 for (const ch of chapters) {
   const file = path.join(ROOT, ch.file);
@@ -55,6 +63,17 @@ for (const ch of chapters) {
   if (!fs.existsSync(file)) { fail(`missing file ${ch.file}`); continue; }
   const md = fs.readFileSync(file, "utf8");
   const blocks = blocksOf(md);
+  // Cross-references: "Chapter N" must exist, "section N.M" must be a real topic heading.
+  const prose = proseOf(md);
+  for (const m of prose.matchAll(/\bChapter (\d+)\b/g)) if (!byNumber[Number(m[1])]) fail(`${ch.id}: "Chapter ${m[1]}" doesn't exist`);
+  for (const m of prose.matchAll(/\bsection (\d+)\.(\d+)\b/g)) {
+    const target = byNumber[Number(m[1])];
+    if (!target || !topicNumbers(target).has(`${m[1]}.${m[2]}`)) fail(`${ch.id}: "section ${m[1]}.${m[2]}" doesn't exist`);
+  }
+  if (/\bChapter [A-C]\b/.test(prose)) fail(`${ch.id}: says "Chapter A/B/C" (appendices are called "Appendix A/B/C")`);
+  // Practice titles must be unique within a chapter (they identify saved progress).
+  const titles = [...md.matchAll(/^```practice \w+ title="([^"]+)"/gm)].map((m) => m[1]);
+  for (const t of new Set(titles.filter((x, i) => titles.indexOf(x) !== i))) fail(`${ch.id}: duplicate practice title "${t}"`);
   let examples = 0, ok = 0, task = null;
   for (let i = 0; i < blocks.length; i++) {
     const b = blocks[i];
@@ -116,9 +135,42 @@ for (const ch of chapters) {
   console.log(`  examples ${ok}/${examples}`);
 }
 
+// ---- links (npm run check -- --links) ----
+if (LINKS) {
+  console.log("\nLinks");
+  const urls = new Map();
+  for (const ch of allChapters) {
+    const md = fs.readFileSync(path.join(ROOT, ch.file), "utf8");
+    for (const m of md.matchAll(/\]\((https?:\/\/[^)\s]+)\)/g)) {
+      const u = m[1].replace(/#.*$/, "");
+      if (!urls.has(u)) urls.set(u, ch.id);
+    }
+  }
+  const list = [...urls];
+  let bad = 0, next = 0;
+  const worker = async () => {
+    while (next < list.length) {
+      const [u, where] = list[next++];
+      let status = 0;
+      for (const method of ["HEAD", "GET"]) {
+        try {
+          const r = await fetch(u, { method, redirect: "follow", signal: AbortSignal.timeout(20000), headers: { "user-agent": "Mozilla/5.0 (book link check)" } });
+          status = r.status;
+          if (r.ok) break;
+        } catch (e) { status = 0; }
+      }
+      if (status < 200 || status >= 300) { bad++; fail(`${where}: ${u} -> ${status || "no response"}`); }
+    }
+  };
+  await Promise.all(Array.from({ length: 8 }, worker));
+  console.log(`  ${list.length - bad}/${list.length} links reachable`);
+}
+
 // ---- browser ----
 if (!NO_BROWSER) {
-  const { chromium } = await import("@playwright/test");
+  const playwright = await import("@playwright/test");
+  const engine = playwright[BROWSER];
+  if (!engine) { console.log(`Unknown --browser=${BROWSER}`); process.exit(1); }
   const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".md": "text/markdown", ".json": "application/json", ".sql": "text/plain", ".svg": "image/svg+xml" };
   const server = http.createServer((req, res) => {
     const p = path.join(ROOT, decodeURIComponent(new URL(req.url, "http://x").pathname));
@@ -131,15 +183,16 @@ if (!NO_BROWSER) {
   });
   await new Promise((r) => server.listen(0, "127.0.0.1", r));
   const base = `http://127.0.0.1:${server.address().port}`;
-  const browser = await chromium.launch();
-  console.log("\nBrowser (Chromium)");
+  const browser = await engine.launch();
+  console.log(`\nBrowser (${BROWSER})`);
   for (const ch of chapters) {
     const md = fs.readFileSync(path.join(ROOT, ch.file), "utf8");
     const solutions = [...md.matchAll(/```solution\n([\s\S]*?)\n```/g)].map((m) => m[1] + "\n");
     const page = await browser.newPage();
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
-    page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
+    // Browsers log failed requests (like an example's deliberate 404) as console errors. Those are expected.
+    page.on("console", (m) => { if (m.type() === "error" && !/Failed to load resource/.test(m.text())) errors.push(m.text()); });
     await page.goto(`${base}/#/c/${ch.id}/all`);
     await page.locator(".chapter-body h2").first().waitFor();
     let ok = 0, bad = 0;

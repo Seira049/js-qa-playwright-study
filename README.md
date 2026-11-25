@@ -43,6 +43,8 @@ See [MAINTAINING.txt](MAINTAINING.txt). Before every commit, run the checks:
 cd tools && npm install && npm run check
 ```
 
+The check also runs in Firefox and WebKit (`--browser=firefox`, `--browser=webkit`) and can verify every source link (`--links`). The book was last checked in all three browsers, on a phone-sized screen, and with all 158 source links.
+
 ## Writing chapters
 
 Chapters are Markdown files in `chapters/`, listed in `book.js`. Special code fences:

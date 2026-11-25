@@ -9,7 +9,7 @@ Tests check dates all the time: *was the order created today? does the subscript
 - what `Temporal` is, and where it's available
 - `Map` for key-value lookups, and `Set` for unique values
 
-> **About time zones in this chapter:** every example uses UTC or an explicit time zone, so it prints the same output on any computer. Examples were run with Node.js v24.18.0 in two different time zones and in Chromium, with identical results.
+> **About time zones in this chapter:** every example uses UTC or an explicit time zone, so it prints the same output on any computer. Every example was run with Node.js v24.18.0 in two different time zones, and in Chromium, Firefox, and WebKit, with identical output. The places where engines differ are called out in the text.
 
 ## 13.1 How a Date stores time
 
@@ -81,17 +81,31 @@ Invalid Date
 
 Check with `Number.isNaN(date.getTime())` before using a date read from a page or an API.
 
-A date that *looks* valid but doesn't exist is **silently moved**: 30 February 2026 becomes 2 March:
+A date that *looks* valid but doesn't exist, like 30 February, is **handled differently by different engines**. Node.js, Chrome, and Firefox silently move it to the next month. Safari's engine (WebKit) calls it an Invalid Date instead:
+
+```js
+// Node.js, Chromium, Firefox:
+new Date("2026-02-30").toISOString();   // "2026-03-02T00:00:00.000Z"
+// WebKit (Safari):
+new Date("2026-02-30").toISOString();   // RangeError: Invalid Date
+```
+
+We ran this in all four to be sure. So a test can't rely on `Number.isNaN(date.getTime())` alone to spot an impossible date: in most browsers it passes. A check that works the same everywhere is a **round trip**: build the date, turn it back into text, and see whether you get what you started with. A date that was moved won't match:
 
 ```js run
-console.log(new Date("2026-02-30").toISOString());
+function isRealDate(isoDate) {
+  const d = new Date(`${isoDate}T00:00:00Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().startsWith(isoDate);
+}
+
+console.log(isRealDate("2026-02-28"), isRealDate("2026-02-30"), isRealDate("soon"));
 ```
 
 ```output
-2026-03-02T00:00:00.000Z
+true false false
 ```
 
-That makes date pickers and "date of birth" fields good places to test with impossible dates. The application may accept them the same way.
+That makes date pickers and "date of birth" fields good places to test with impossible dates such as 30 February, or `2026-13-01`: the application may accept them, move them, or reject them.
 
 ## 13.3 Comparing dates and date arithmetic
 
@@ -158,22 +172,22 @@ Adding a month to 31 January gives **3 March** in 2026, because there's no 31 Fe
 `Intl.DateTimeFormat` formats dates for people, in a given language (*locale*) and **time zone**:
 
 ```js run
-const d = new Date(Date.UTC(2026, 2, 1, 9, 30));
+const d = new Date(Date.UTC(2026, 2, 1, 20, 30)); // 1 March, 20:30 UTC
 
 console.log(new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeZone: "UTC" }).format(d));
 console.log(new Intl.DateTimeFormat("en-GB", { dateStyle: "long", timeZone: "UTC" }).format(d));
-console.log(new Intl.DateTimeFormat("en-US", {
-  dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Manila",
-}).format(d));
+console.log(new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeZone: "Asia/Manila" }).format(d));
 ```
 
 ```output
 Mar 1, 2026
 1 March 2026
-Mar 1, 2026, 5:30 PM
+Mar 2, 2026
 ```
 
-The same moment is 09:30 in UTC and 17:30 in Manila. If you leave out `timeZone`, the computer's own time zone is used, and the output changes from machine to machine. (`date.toLocaleDateString("en-US", { timeZone: "UTC" })` is a shortcut for the same thing.)
+The same moment is **1 March** in UTC but **2 March** in Manila (UTC+8), where it's already 04:30. If you leave out `timeZone`, the computer's own time zone is used, and the output changes from machine to machine. (`date.toLocaleDateString("en-US", { timeZone: "UTC" })` is a shortcut for the same thing.)
+
+> **Formatting differs slightly between browsers.** The text comes from each browser's locale data, so punctuation and wording can differ. For a date **with a time** (`dateStyle: "medium", timeStyle: "short"`), Node.js 24, Chromium, and Firefox printed `Mar 1, 2026, 5:30 PM`, but Playwright's WebKit printed `Mar 1, 2026 at 5:30 PM`. When a test compares a formatted date, check the parts that matter (the day, the month, the year) with a regular expression (Chapter 4), instead of one long exact string, if the test runs in more than one browser.
 
 `Intl.NumberFormat` does the same for numbers and money:
 
@@ -480,10 +494,15 @@ console.log(duplicates, missing, unexpected);
     "why": "The same moment can fall on a different date in different time zones. Pass `timeZone` explicitly."
   },
   {
-    "q": "What does `new Date(\"2026-02-30\")` give?",
-    "options": ["An Invalid Date", "A `RangeError`", "2 March 2026 (silently moved)", "28 February 2026"],
-    "answer": 2,
-    "why": "Impossible days roll over into the next month instead of failing."
+    "q": "Why isn't `Number.isNaN(new Date(text).getTime())` enough to prove that `text` is a real date like `\"2026-02-30\"`?",
+    "options": [
+      "`getTime` is slow",
+      "Node.js, Chrome, and Firefox accept impossible dates and move them to the next month, while Safari rejects them, so the result depends on the browser",
+      "`NaN` can never be detected",
+      "Dates can't be compared"
+    ],
+    "answer": 1,
+    "why": "Use a round trip instead: turn the date back into an ISO string and check that it still starts with the text you began with."
   },
   {
     "q": "How do you check an array of IDs for duplicates?",
@@ -507,7 +526,7 @@ console.log(duplicates, missing, unexpected);
 
 ## Sources
 
-Every example was run with Node.js v24.18.0 (in two different time zones) and in Chromium 159 through Playwright 1.65.1, with identical output. TypeScript messages come from TypeScript 7.0.2.
+Every example was run with Node.js v24.18.0 (in two different time zones) and in Chromium, Firefox, and WebKit through Playwright 1.65.1, with identical output. The differences described in sections 13.2 and 13.4 were observed in those runs. TypeScript messages come from TypeScript 7.0.2.
 
 - MDN, *Date* (epoch milliseconds, months from 0, UTC vs local methods, invalid dates): [developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)
 - MDN, *Date.parse* (date-only forms are UTC, date-time forms without an offset are local): [developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/parse](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/parse)
